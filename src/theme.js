@@ -23,7 +23,8 @@ export const tokensDark = {
         600: "#F0F3FC", //adjusted
         700: "#365580",
         800: "#243855",
-        900: "#121c2b"
+        900: "#121c2b",
+        1000: "#000000"
     },
     secondary: {
       // yellow
@@ -37,6 +38,7 @@ export const tokensDark = {
       700: "#D9D9D9",
       800: "#D9D9D9",
       900: "#332a14",
+      1000: "#000000",
     },
   };
   
@@ -72,15 +74,16 @@ export const tokensDark = {
               },
               secondary: {
                 ...tokensDark.secondary,
-                main: tokensDark.secondary[300],
+                main: tokensDark.secondary[1000],
               },
               neutral: {
                 ...tokensDark.grey,
                 main: tokensDark.grey[500],
               },
               background: {
-                default: tokensDark.primary[600],
-                alt: tokensDark.primary[500],
+                default: tokensDark.primary[1000],
+                alt: tokensDark.primary[1000],
+                search: tokensDark.grey[1000]
               },
             }
           : {

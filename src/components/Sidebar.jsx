@@ -1,4 +1,6 @@
 import {
+  BottomNavigationAction,
+  BottomNavigation,
   Box,
   Divider,
   Drawer,
@@ -26,7 +28,12 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  WarehouseOutlined,
+  PeopleAltOutlined,
+  ChatOutlined,
+  PersonOutline,
 } from "@mui/icons-material";
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
@@ -39,32 +46,60 @@ const navItems = [
     icon: <HomeOutlined />,
   },
   {
-    text: "Client Facing",
+    text: "Módulo Ventas",
     icon: null,
   },
   {
-    text: "Products",
+    text: "Vista General",
+    icon: <PointOfSaleOutlined />,
+  },
+  {
+    text: "Facturas",
+    icon: <ReceiptLongOutlined />,
+  },
+  {
+    text: "Pedidos",
     icon: <ShoppingCartOutlined />,
   },
   {
-    text: "Customers",
+    text: "Clientes",
     icon: <Groups2Outlined />,
   },
   {
-    text: "Transactions",
-    icon: <ReceiptLongOutlined />,
+    text: "Módulo Inventario",
+    icon: null,
+  },
+  {
+    text: "Productos",
+    icon: <Inventory2OutlinedIcon/>,
+  },
+  {
+    text: "Insumos",
+    icon: <WarehouseOutlined/>,
+  },
+  {
+    text: "Módulo Geografía",
+    icon: null,
   },
   {
     text: "Geography",
     icon: <PublicOutlined />,
   },
   {
-    text: "Sales",
+    text: "Módulo Proveedores",
     icon: null,
   },
   {
-    text: "Overview",
-    icon: <PointOfSaleOutlined />,
+    text: "Proveedores",
+    icon: <PeopleAltOutlined />,
+  },
+  {
+    text: "Mensajes",
+    icon: <ChatOutlined />,
+  },
+  {
+    text: "Módulo Análisis",
+    icon: null,
   },
   {
     text: "Daily",
@@ -83,11 +118,11 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Admin",
+    text: "Administración",
     icon: <AdminPanelSettingsOutlined />,
   },
   {
-    text: "Performance",
+    text: "Rendimiento",
     icon: <TrendingUpOutlined />,
   },
 ];
@@ -110,7 +145,7 @@ const Sidebar = ({
 
   return (
     <Box component="nav">
-      {isSidebarOpen && (
+      {isSidebarOpen && isNonMobile && (
         <Drawer
           open={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -119,7 +154,7 @@ const Sidebar = ({
           sx={{
             width: drawerWidth,
             "& .MuiDrawer-paper": {
-              color: theme.palette.secondary[200],
+              color: theme.palette.mode === "dark" ? theme.palette.primary[500]:theme.palette.secondary[1000] ,
               backgroundColor: theme.palette.background.alt,
               boxSixing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
@@ -156,24 +191,39 @@ const Sidebar = ({
                         navigate(`/${lcText}`);
                         setActive(lcText);
                       }}
-                      sx={{
+                      sx={theme.palette.mode === "dark" ? {
                         backgroundColor:
                           active === lcText
-                            ? theme.palette.secondary[300]
+                            ? theme.palette.primary[100]
                             : "transparent",
                         color:
                           active === lcText
-                            ? theme.palette.primary[600]
-                            : theme.palette.secondary[100],
+                            ? theme.palette.primary[900]
+                            : theme.palette.primary[500],
+                      } : {
+                        backgroundColor:
+                          active === lcText
+                            ? theme.palette.secondary[900]
+                            : "transparent",
+                        color:
+                          active === lcText
+                            ? theme.palette.primary[100]
+                            : theme.palette.secondary[1000],
                       }}
                     >
                       <ListItemIcon
-                        sx={{
+                        sx={theme.palette.mode === "dark" ? {
                           ml: "2rem",
                           color:
                             active === lcText
-                              ? theme.palette.primary[600]
-                              : theme.palette.secondary[200],
+                              ? theme.palette.primary[900]
+                              : theme.palette.grey[1000],
+                        } : {
+                          ml: "2rem",
+                          color:
+                            active === lcText
+                              ? theme.palette.primary[100]
+                              : theme.palette.secondary[1000],
                         }}
                       >
                         {icon}
@@ -189,7 +239,7 @@ const Sidebar = ({
             </List>
           </Box>
 
-          <Box position="absolute" bottom="2rem">
+          <Box /* position="absolute" */ bottom="2rem">
             <Divider />
             <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
               <Box
@@ -205,20 +255,20 @@ const Sidebar = ({
                 <Typography
                   fontWeight="bold"
                   fontSize="0.9rem"
-                  sx={{ color: theme.palette.secondary[100] }}
+                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
                 >
-                  {user.name}
+                  Usuario{user.name}
                 </Typography>
                 <Typography
                   fontSize="0.8rem"
-                  sx={{ color: theme.palette.secondary[200] }}
+                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
                 >
-                  {user.occupation}
+                  Rol{user.occupation}
                 </Typography>
               </Box>
               <SettingsOutlined
                 sx={{
-                  color: theme.palette.secondary[300],
+                  color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000],
                   fontSize: "25px ",
                 }}
               />
@@ -226,6 +276,30 @@ const Sidebar = ({
           </Box>
         </Drawer>
       )}
+      {/* Bottom navigation bar for mobile */}
+      {!isNonMobile && (
+        <BottomNavigation
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
+          }}
+          value={active}
+          onChange={(event, newValue) => {
+            setActive(newValue);
+            navigate(`/${newValue}`);
+          }}
+        >
+            <BottomNavigationAction label="Home" value="dashboard" icon={<HomeOutlined />} />
+            <BottomNavigationAction label="Orders" value="pedidos" icon={<ShoppingCartOutlined />} />
+            <BottomNavigationAction label="Clients" value="clientes" icon={<Groups2Outlined />} />
+            <BottomNavigationAction label="Products" value="productos" icon={<Inventory2OutlinedIcon />} />
+            <BottomNavigationAction label="Profile" value="profile" icon={<PersonOutline />} />
+          </BottomNavigation>
+    )}
     </Box>
   );
 };

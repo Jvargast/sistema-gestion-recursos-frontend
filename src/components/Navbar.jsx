@@ -22,7 +22,9 @@ import {
   Menu,
   MenuItem,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
@@ -32,6 +34,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const isOpen = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
+  const isNonMobile = useMediaQuery("(min-width: 600px)");
 
   return (
     <AppBar
@@ -44,11 +47,14 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
       <Toolbar sx={{ justifyContent: "space-between" }}>
         {/* LEFT SIDE */}
         <FlexBetween>
-          <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <IconButton
+            sx={{ display: `${isNonMobile ? "" : "none"}`, color: `${theme.palette.mode === "dark" ? "#FFFFFF":"#000000"}` }}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
             <MenuIcon />
           </IconButton>
           <FlexBetween
-            backgroundColor={theme.palette.background.search}
+            backgroundColor={theme.palette.mode === "dark" ? "#000000":"#FFFFFF"}
             borderRadius="2rem"
             gap="3rem"
             p="0.1rem 1.5rem"
@@ -65,13 +71,33 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         <FlexBetween gap="1.5rem">
           <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
-              <DarkModeOutlined sx={{ fontSize: "25px" }} />
+              <LightModeOutlined sx={{ fontSize: "25px", color: "#ffffff" }} />
             ) : (
-              <LightModeOutlined sx={{ fontSize: "25px" }} />
+              
+              <DarkModeOutlined sx={{ fontSize: "25px", color: "#0D497D" }} />
             )}
           </IconButton>
           <IconButton>
-            <SettingsOutlined sx={{ fontSize: "25px" }} />
+            {theme.palette.mode === "dark" ? (
+              <NotificationsNoneOutlinedIcon
+                sx={{ fontSize: "25px", color: "#ffffff" }}
+              />
+            ) : (
+              <NotificationsNoneOutlinedIcon
+                sx={{ fontSize: "25px", color: "#0D497D" }}
+              />
+            )}
+          </IconButton>
+          <IconButton>
+            {theme.palette.mode === "dark" ? (
+              <SettingsOutlined
+                sx={{ fontSize: "25px" , color: "#ffffff" }}
+              />
+            ) : (
+              <SettingsOutlined
+                sx={{ fontSize: "25px" , color: "#0D497D" }}
+              />
+            )}
           </IconButton>
 
           <FlexBetween>
@@ -98,15 +124,15 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 <Typography
                   fontWeight="bold"
                   fontSize="0.85rem"
-                  sx={{ color: theme.palette.secondary[100] }}
+                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
                 >
-                  {user.name}
+                  Usuario{user.name}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
-                  sx={{ color: theme.palette.secondary[200] }}
+                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
                 >
-                  {user.occupation}
+                  Rol{user.occupation}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined
