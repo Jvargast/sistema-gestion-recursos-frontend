@@ -7,10 +7,10 @@ import {
   SettingsOutlined,
   ArrowDropDownOutlined,
 } from "@mui/icons-material";
-import FlexBetween from "../components/FlexBetween";
-import { useDispatch } from "react-redux";
-import { setMode } from "../state";
-import profileImage from "../assets/profile.jpeg";
+import FlexBetween from "./FlexBetween";
+import { useDispatch, useSelector } from "react-redux";
+import { setMode } from "../../state/reducers/globalSlice";
+import profileImage from "../../assets/images/profile.jpeg";
 import {
   AppBar,
   Button,
@@ -25,10 +25,26 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import { useLogoutMutation } from "../../services/authApi";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
+  const mode = useSelector((state) => state.global.mode)
   const theme = useTheme();
+
+
+  const navigate = useNavigate();
+  const [logout] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      navigate("/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
 
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
@@ -48,7 +64,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         {/* LEFT SIDE */}
         <FlexBetween>
           <IconButton
-            sx={{ display: `${isNonMobile ? "" : "none"}`, color: `${theme.palette.mode === "dark" ? "#FFFFFF":"#000000"}` }}
+            sx={{ display: `${isNonMobile ? "" : "none"}`, color: `${mode  === "dark" ? "#FFFFFF":"#000000"}` }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
             <MenuIcon />
@@ -126,13 +142,13 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                   fontSize="0.85rem"
                   sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
                 >
-                  Usuario{user.name}
+                  {user.nombre}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
                   sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
                 >
-                  Rol{user.occupation}
+                  {user.rol.nombre}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined
@@ -145,7 +161,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               onClose={handleClose}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-              <MenuItem onClick={handleClose}>Log Out</MenuItem>
+              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
             </Menu>
           </FlexBetween>
         </FlexBetween>

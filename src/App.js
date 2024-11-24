@@ -3,10 +3,16 @@ import { createTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { themeSettings } from "./theme";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 /* import Login from "scenes/login"; */
-import Layout from "./scenes/layout";
-import Dashboard from "./scenes/dashboard";
+import Layout from "./pages/layout";
+import Dashboard from "./pages/dashboard";
+import ProtectedRoute from "./components/utils/ProtectedRoutes";
+import Login from "./pages/login";
 /* import Products from "scenes/products";
 import Customers from "scenes/customers";
 import Transactions from "scenes/transactions";
@@ -22,30 +28,72 @@ import Performance from "scenes/performance";
 function App() {
   const mode = useSelector((state) => state.global.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+
+  // Configuración del enrutador
+  const router = createBrowserRouter(
+    [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/",
+        element: <ProtectedRoute />, // Envolvemos las rutas protegidas
+        children: [
+          {
+            element: <Layout />, // Layout principal
+            children: [
+              { path: "/", element: <Navigate to="/dashboard" replace /> },
+              { path: "/dashboard", element: <Dashboard /> },
+              // Agrega otras rutas aquí...
+            ],
+          },
+        ],
+      },
+    ],
+    {
+      // Habilitar banderas de React Router v7
+      future: {
+        v7_startTransition: true, // Ya estaba activada
+        v7_relativeSplatPath: true, // Ya estaba activada
+        v7_fetcherPersist: true, // Nueva bandera
+        v7_normalizeFormMethod: true, // Nueva bandera
+        v7_partialHydration: true, // Nueva bandera
+        v7_skipActionErrorRevalidation: true, // Nueva bandera
+      },
+    }
+  );
+
   return (
     <div className="app">
-      <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Routes>
-          {/* <Route path="/login" element={<Login />} /> */}
-          <Route element={<Layout />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              {/* <Route path="/products" element={<Products />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/geography" element={<Geography />} />
-              <Route path="/overview" element={<Overview />} />
-              <Route path="/daily" element={<Daily />} />
-              <Route path="/monthly" element={<Monthly />} />
-              <Route path="/breakdown" element={<Breakdown />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/performance" element={<Performance />} /> */}
+      {/* <BrowserRouter> */}
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <RouterProvider router={router} />
+        {/* <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route
+                  path="/"
+                  element={<Navigate to="/dashboard" replace />}
+                />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/geography" element={<Geography />} />
+                <Route path="/overview" element={<Overview />} />
+                <Route path="/daily" element={<Daily />} />
+                <Route path="/monthly" element={<Monthly />} />
+                <Route path="/breakdown" element={<Breakdown />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/performance" element={<Performance />} />
+              </Route>
             </Route>
-          </Routes>
-        </ThemeProvider>
-      </BrowserRouter>
+          </Routes> */}
+      </ThemeProvider>
+      {/* </BrowserRouter> */}
     </div>
   );
 }

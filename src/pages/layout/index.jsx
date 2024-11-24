@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import { Box, useMediaQuery } from "@mui/material";
 import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
-/* import { useGetUserQuery } from "../../state/api"; */
+import Sidebar from "../../components/layout/Sidebar";
+import Navbar from "../../components/layout/Navbar";
+import { useGetAuthenticatedUserQuery } from "../../services/authApi"; 
 
 const Layout = () => {
   const isNonMobile = useMediaQuery("(min-width: 600px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const userId = useSelector((state) => state.global.userId);
-  /* const { data } = useGetUserQuery(userId); */
+
+  // Hook para obtener datos del usuario autenticado
+  const { data: user, isLoading, isError } = useGetAuthenticatedUserQuery();
+  if (isLoading) return <div>Cargando usuario...</div>;
+  if (isError) return <div>Error al cargar datos del usuario</div>;
+
   return (
     <Box display={isNonMobile ? "flex" : "block"} width="100%" height="100%">
       <Sidebar
-        user={/* data || */ {}}
+        user={ user.user ||  {}}
         isNonMobile={isNonMobile}
         drawerWidth="250px"
         isSidebarOpen={isSidebarOpen}
@@ -22,7 +25,7 @@ const Layout = () => {
       />
       <Box flexGrow={1}>
         <Navbar
-          user={/* data || */ {}}
+          user={ user.user || {}}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />

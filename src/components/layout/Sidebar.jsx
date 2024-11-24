@@ -37,8 +37,8 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
-import profileImage from "../assets/profile.jpeg";
-import logoImage from "../assets/logo_aguas_valentino2.png";
+import profileImage from "../../assets/images/profile.jpeg";
+import logoImage from "../../assets/images/logo_aguas_valentino2.png"
 
 const navItems = [
   {
@@ -257,13 +257,13 @@ const Sidebar = ({
                   fontSize="0.9rem"
                   sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
                 >
-                  Usuario{user.name}
+                  {user.nombre}
                 </Typography>
                 <Typography
                   fontSize="0.8rem"
                   sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
                 >
-                  Rol{user.occupation}
+                  {user.rol.nombre}
                 </Typography>
               </Box>
               <SettingsOutlined
