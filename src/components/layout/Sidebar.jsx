@@ -33,12 +33,14 @@ import {
   ChatOutlined,
   PersonOutline,
 } from "@mui/icons-material";
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
+import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import profileImage from "../../assets/images/profile.jpeg";
-import logoImage from "../../assets/images/logo_aguas_valentino2.png"
+import logoImage from "../../assets/images/logo_aguas_valentino2.png";
 
 const navItems = [
   {
@@ -50,16 +52,24 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Vista General",
-    icon: <PointOfSaleOutlined />,
-  },
-  {
     text: "Facturas",
     icon: <ReceiptLongOutlined />,
   },
   {
+    text: "Pagos",
+    icon: <PaymentOutlinedIcon />,
+  },
+  {
+    text: "Cotizaciones",
+    icon: <RequestQuoteOutlinedIcon />,
+  },
+  {
     text: "Pedidos",
     icon: <ShoppingCartOutlined />,
+  },
+  {
+    text: "Ventas",
+    icon: <PointOfSaleOutlined />,
   },
   {
     text: "Clientes",
@@ -71,11 +81,11 @@ const navItems = [
   },
   {
     text: "Productos",
-    icon: <Inventory2OutlinedIcon/>,
+    icon: <Inventory2OutlinedIcon />,
   },
   {
     text: "Insumos",
-    icon: <WarehouseOutlined/>,
+    icon: <WarehouseOutlined />,
   },
   {
     text: "Módulo Geografía",
@@ -154,7 +164,10 @@ const Sidebar = ({
           sx={{
             width: drawerWidth,
             "& .MuiDrawer-paper": {
-              color: theme.palette.mode === "dark" ? theme.palette.primary[500]:theme.palette.secondary[1000] ,
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.primary[500]
+                  : theme.palette.secondary[1000],
               backgroundColor: theme.palette.background.alt,
               boxSixing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
@@ -164,8 +177,22 @@ const Sidebar = ({
         >
           <Box width="100%">
             <Box m="1.5rem 2rem 2rem 3rem">
-              <Box color={theme.palette.secondary.main} justifyContent="center" display="flex" alignItems="center">
-                <Box display="flex" alignItems="center" gap="0.5rem" src={logoImage} alt="logo" height="56.59px" width="100px" component="img"/>
+              <Box
+                color={theme.palette.secondary.main}
+                justifyContent="center"
+                display="flex"
+                alignItems="center"
+              >
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap="0.5rem"
+                  src={logoImage}
+                  alt="logo"
+                  height="56.59px"
+                  width="100px"
+                  component="img"
+                />
                 {!isNonMobile && (
                   <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                     <ChevronLeft />
@@ -191,40 +218,48 @@ const Sidebar = ({
                         navigate(`/${lcText}`);
                         setActive(lcText);
                       }}
-                      sx={theme.palette.mode === "dark" ? {
-                        backgroundColor:
-                          active === lcText
-                            ? theme.palette.primary[100]
-                            : "transparent",
-                        color:
-                          active === lcText
-                            ? theme.palette.primary[900]
-                            : theme.palette.primary[500],
-                      } : {
-                        backgroundColor:
-                          active === lcText
-                            ? theme.palette.secondary[900]
-                            : "transparent",
-                        color:
-                          active === lcText
-                            ? theme.palette.primary[100]
-                            : theme.palette.secondary[1000],
-                      }}
+                      sx={
+                        theme.palette.mode === "dark"
+                          ? {
+                              backgroundColor:
+                                active === lcText
+                                  ? theme.palette.primary[100]
+                                  : "transparent",
+                              color:
+                                active === lcText
+                                  ? theme.palette.primary[900]
+                                  : theme.palette.primary[500],
+                            }
+                          : {
+                              backgroundColor:
+                                active === lcText
+                                  ? theme.palette.secondary[900]
+                                  : "transparent",
+                              color:
+                                active === lcText
+                                  ? theme.palette.primary[100]
+                                  : theme.palette.secondary[1000],
+                            }
+                      }
                     >
                       <ListItemIcon
-                        sx={theme.palette.mode === "dark" ? {
-                          ml: "2rem",
-                          color:
-                            active === lcText
-                              ? theme.palette.primary[900]
-                              : theme.palette.grey[1000],
-                        } : {
-                          ml: "2rem",
-                          color:
-                            active === lcText
-                              ? theme.palette.primary[100]
-                              : theme.palette.secondary[1000],
-                        }}
+                        sx={
+                          theme.palette.mode === "dark"
+                            ? {
+                                ml: "2rem",
+                                color:
+                                  active === lcText
+                                    ? theme.palette.primary[900]
+                                    : theme.palette.grey[1000],
+                              }
+                            : {
+                                ml: "2rem",
+                                color:
+                                  active === lcText
+                                    ? theme.palette.primary[100]
+                                    : theme.palette.secondary[1000],
+                              }
+                        }
                       >
                         {icon}
                       </ListItemIcon>
@@ -255,20 +290,33 @@ const Sidebar = ({
                 <Typography
                   fontWeight="bold"
                   fontSize="0.9rem"
-                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
+                  sx={{
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.primary[100]
+                        : theme.palette.secondary[1000],
+                  }}
                 >
                   {user.nombre}
                 </Typography>
                 <Typography
                   fontSize="0.8rem"
-                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000] }}
+                  sx={{
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.primary[100]
+                        : theme.palette.secondary[1000],
+                  }}
                 >
                   {user.rol.nombre}
                 </Typography>
               </Box>
               <SettingsOutlined
                 sx={{
-                  color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[1000],
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.primary[100]
+                      : theme.palette.secondary[1000],
                   fontSize: "25px ",
                 }}
               />
@@ -293,13 +341,33 @@ const Sidebar = ({
             navigate(`/${newValue}`);
           }}
         >
-            <BottomNavigationAction label="Home" value="dashboard" icon={<HomeOutlined />} />
-            <BottomNavigationAction label="Orders" value="pedidos" icon={<ShoppingCartOutlined />} />
-            <BottomNavigationAction label="Clients" value="clientes" icon={<Groups2Outlined />} />
-            <BottomNavigationAction label="Products" value="productos" icon={<Inventory2OutlinedIcon />} />
-            <BottomNavigationAction label="Profile" value="profile" icon={<PersonOutline />} />
-          </BottomNavigation>
-    )}
+          <BottomNavigationAction
+            label="Home"
+            value="dashboard"
+            icon={<HomeOutlined />}
+          />
+          <BottomNavigationAction
+            label="Orders"
+            value="pedidos"
+            icon={<ShoppingCartOutlined />}
+          />
+          <BottomNavigationAction
+            label="Clients"
+            value="clientes"
+            icon={<Groups2Outlined />}
+          />
+          <BottomNavigationAction
+            label="Products"
+            value="productos"
+            icon={<Inventory2OutlinedIcon />}
+          />
+          <BottomNavigationAction
+            label="Profile"
+            value="profile"
+            icon={<PersonOutline />}
+          />
+        </BottomNavigation>
+      )}
     </Box>
   );
 };

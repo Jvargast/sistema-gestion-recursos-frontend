@@ -5,6 +5,7 @@ import {
   useLoginMutation,
   useGetAuthenticatedUserQuery,
 } from "../../services/authApi";
+import logoImage from "../../assets/images/logoLogin.png"
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,9 +52,21 @@ const Login = () => {
       flexDirection="column"
       sx={{ backgroundColor: "#f5f5f5" }}
     >
-      <Typography variant="h4" sx={{ mb: 4 }}>
+      {/* <Typography variant="h4" sx={{ mb: 4 }}>
         Aguas Valentino
-      </Typography>
+      </Typography> */}
+      <Box justifyContent="center" display="flex" alignItems="center">
+        <Box
+          display="flex"
+          alignItems="center"
+          gap="0.5rem"
+          src={logoImage}
+          alt="logo"
+          height="104.83px"
+          width="200px"
+          component="img"
+        />
+      </Box>
       <Box
         display="flex"
         flexDirection="column"

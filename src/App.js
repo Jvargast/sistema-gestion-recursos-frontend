@@ -13,6 +13,11 @@ import Layout from "./pages/layout";
 import Dashboard from "./pages/dashboard";
 import ProtectedRoute from "./components/utils/ProtectedRoutes";
 import Login from "./pages/login";
+import Productos from "./pages/productos";
+import Clientes from "./pages/clientes";
+import Cotizaciones from "./pages/transacciones/cotizaciones";
+import Pedidos from "./pages/transacciones/pedidos";
+import Ventas from "./pages/transacciones/ventas";
 /* import Products from "scenes/products";
 import Customers from "scenes/customers";
 import Transactions from "scenes/transactions";
@@ -45,6 +50,11 @@ function App() {
             children: [
               { path: "/", element: <Navigate to="/dashboard" replace /> },
               { path: "/dashboard", element: <Dashboard /> },
+              { path: "/productos", element: <Productos /> },
+              { path: "/clientes", element: <Clientes /> },
+              { path: "/cotizaciones", element: <Cotizaciones/> },
+              { path: "/pedidos", element: <Pedidos/> },
+              { path: "/ventas", element: <Ventas/> },
               // Agrega otras rutas aquí...
             ],
           },

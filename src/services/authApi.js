@@ -6,7 +6,7 @@ export const authApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.REACT_APP_BASE_URL,
     credentials: "include", // Para enviar/recibir cookies
-    /* tagTypes: ["Auth"], */
+    tagTypes: ["Auth"], // ¿?
   }),
   endpoints: (builder) => ({
     login: builder.mutation({
