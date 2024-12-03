@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const categoriaApi = createApi({
   reducerPath: "categoriaApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL + "/categorias-productos", // Asegúrate de tener configurada esta variable
+    baseUrl: API_URL + "/categorias-productos", // Asegúrate de tener configurada esta variable
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["Categoria"], // Para manejar la invalidación de caché

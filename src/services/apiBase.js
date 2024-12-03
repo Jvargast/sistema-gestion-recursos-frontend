@@ -1,0 +1,1 @@
+export const API_URL = "https://sistema-gestion-recursos-backend.onrender.com/api";

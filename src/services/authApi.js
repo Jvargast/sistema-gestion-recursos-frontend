@@ -4,7 +4,7 @@ import { setUser, logout } from "../state/reducers/authSlice";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL,
+    baseUrl: API_URL,
     credentials: "include", // Para enviar/recibir cookies
     tagTypes: ["Auth"], // ¿?
   }),

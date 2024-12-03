@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const inventarioApi = createApi({
   reducerPath: "inventarioApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL + "/productos", // Asegúrate de tener configurada esta variable
+    baseUrl: API_URL + "/productos", // Asegúrate de tener configurada esta variable
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["Producto"], // Para manejar la invalidación de caché

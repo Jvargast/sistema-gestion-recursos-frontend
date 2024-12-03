@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const ventasEstadisticasApi = createApi({
   reducerPath: "ventasEstadisticasApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL + "/analisis/ventas",
+    baseUrl: API_URL + "/analisis/ventas",
     credentials: "include",
   }),
   tagTypes: ["AnalisisVenta"],
