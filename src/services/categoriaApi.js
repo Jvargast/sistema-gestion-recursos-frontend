@@ -18,7 +18,7 @@ export const categoriaApi = createApi({
       async onQueryStarted(args, {queryFulfilled}) {
         try {
             const {data} = await queryFulfilled;
-            console.log("Lista de categorias obtenida:", data);
+            console.log("Lista de categorias obtenidas:", data);
         } catch (error) {
             console.log("Error al obtener la lista de categorias", error)
         }

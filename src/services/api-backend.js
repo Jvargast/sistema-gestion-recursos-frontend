@@ -6,6 +6,7 @@ import {ventasApi} from "./ventasApi";
 import { inventarioApi } from "./inventarioApi"; // Similar a los ejemplos anteriores
 import {categoriaApi} from "./categoriaApi";
 import {estadoProductoApi} from "./estadoProductoApi";
+import { ventasEstadisticasApi } from "./analisisApi";
 //import { ventasApi } from "./ventasApi";
 //import { proveedoresApi } from "./proveedoresApi";
 
@@ -16,7 +17,8 @@ export const apiMiddleware = [
   ventasApi.middleware,
   inventarioApi.middleware,
   categoriaApi.middleware,
-  estadoProductoApi.middleware
+  estadoProductoApi.middleware,
+  ventasEstadisticasApi.middleware,
   /*ventasApi.middleware,
   proveedoresApi.middleware, */
 ];
@@ -29,6 +31,7 @@ export const apiReducers = {
   [inventarioApi.reducerPath]: inventarioApi.reducer,
   [categoriaApi.reducerPath]: categoriaApi.reducer,
   [estadoProductoApi.reducerPath]: estadoProductoApi.reducer,
+  [ventasEstadisticasApi.reducerPath]: ventasEstadisticasApi.reducer,
   /*[ventasApi.reducerPath]: ventasApi.reducer,
   [proveedoresApi.reducerPath]: proveedoresApi.reducer, */
 };
@@ -41,6 +44,7 @@ export default {
   inventarioApi,
   categoriaApi,
   estadoProductoApi,
+  ventasEstadisticasApi,
   /*ventasApi,
   proveedoresApi, */
 };

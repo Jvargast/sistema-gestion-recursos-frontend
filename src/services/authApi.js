@@ -8,6 +8,7 @@ export const authApi = createApi({
     credentials: "include", // Para enviar/recibir cookies
     tagTypes: ["Auth"], // ¿?
   }),
+  
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
