@@ -1,20 +1,28 @@
 import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, IconButton, useTheme } from "@mui/material";
-import { Add } from "@mui/icons-material";
 import {
-  useCreateProductoMutation,
-  useDeleteProductoMutation,
-  useGetAllProductosQuery,
-} from "../../services/inventarioApi";
+  Box,
+  Button,
+  IconButton,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  useTheme,
+} from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { useGetAllProductosQuery } from "../../services/inventarioApi";
+import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllCategoriasQuery } from "../../services/categoriaApi";
 import { useGetAllEstadosQuery } from "../../services/estadoProductoApi";
-import { DataGrid } from "@mui/x-data-grid";
 import ModalForm from "../../components/common/ModalForm";
-import AlertDialog from "../../components/common/AlertDialog";
 
-const Productos = () => {
+const Insumos = () => {
   const theme = useTheme();
   // values to be sent to the backend
   const [page, setPage] = useState(0);
@@ -23,7 +31,7 @@ const Productos = () => {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const { data, isLoading } = useGetAllProductosQuery({
-    tipo_producto: "Producto_Terminado",
+    tipo_producto: "Insumo",
     search,
   });
   const {
@@ -36,18 +44,11 @@ const Productos = () => {
     loadingEstados,
     errorEstados,
   } = useGetAllEstadosQuery();
-  const [createProducto] = useCreateProductoMutation();
-  const [deleteProducto] = useDeleteProductoMutation();
-
   // Selección de filas
   const [selectedRows, setSelectedRows] = useState([]);
-  // Selección producto
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  // Modal agregar productos
+  // Modal agregar insumos
   const [open, setOpen] = useState(false);
-  // Dialog Alert
-  const [openAlert, setOpenAlert] = useState(false);
-  // Arreglo de datos
+
   const rows = data
     ? data.map((row) => ({
         ...row,
@@ -58,6 +59,8 @@ const Productos = () => {
         id: row.id_producto,
       }))
     : [];
+
+  // Datos simulados para la tabla
 
   // Definir las columnas del DataGrid
   const columns = [
@@ -74,12 +77,11 @@ const Productos = () => {
       ),
     },
     { field: "id_producto", headerName: "ID", flex: 0.25 },
-    { field: "inventarioNombre", headerName: "Stock", flex: 0.315 },
+    { field: "inventarioNombre", headerName: "Stock Disponible", flex: 0.5 },
     { field: "nombre_producto", headerName: "Nombre", flex: 0.5 },
     { field: "codigo_barra", headerName: "Código de Barra", flex: 0.5 },
-    { field: "marca", headerName: "Marca", flex: 0.3 },
-    { field: "precio", headerName: "Precio", flex: 0.3 },
-    { field: "categoriaNombre", headerName: "Categoría", flex: 0.4 },
+    { field: "marca", headerName: "Marca", flex: 0.5 },
+    { field: "categoriaNombre", headerName: "Categoría", flex: 0.5 },
     { field: "estadoNombre", headerName: "Estado", flex: 0.5 },
     {
       field: "acciones",
@@ -107,8 +109,7 @@ const Productos = () => {
             color="error"
             onClick={(event) => {
               event.stopPropagation();
-              /* setOpenAlert(true); */
-              handleDeleteClick(params.row);
+              handleDelete(params.row);
             }}
           >
             <DeleteIcon />
@@ -117,13 +118,11 @@ const Productos = () => {
       ),
     },
   ];
-
   const fields = [
-    { name: "nombre_producto", label: "Nombre del Producto", type: "text" },
+    { name: "nombre_producto", label: "Nombre del Insumo", type: "text" },
     { name: "marca", label: "Marca", type: "text" },
     { name: "codigo_barra", label: "Código de Barra", type: "text" },
     { name: "precio", label: "Precio", type: "text" },
-    { name: "cantidad_inicial", label: "Cantidad", type: "text" },
     { name: "descripcion", label: "Descripción", type: "text" },
     {
       name: "id_categoria",
@@ -153,43 +152,22 @@ const Productos = () => {
         : [],
       defaultValue: 1,
     },
-    {
-      name: "id_tipo_producto",
-      defaultValue: 1,
-    },
   ];
+
   // Función para manejar formulario
-  const handleSubmit = async (data) => {
-    try {
-      await createProducto(data).unwrap();
-      console.log("Datos formulario", data);
-    } catch (error) {
-      alert("Error al crear Producto");
-      console.error(error);
-    }
+  const handleSubmit = (data) => {
+    console.log("Datos formulario", data);
   };
 
   // Función para manejar la acción de editar
   const handleEdit = (row) => {
-    console.log("Editar producto:", row);
+    console.log("Editar insumo:", row);
     // Aquí puedes implementar lógica adicional, como abrir un modal para editar la cotización
   };
-  const handleDeleteClick = (row) => {
-    setSelectedProduct(row);
-    setOpenAlert(true);
-  };
   // Función para manejar la acción de eliminar
-  const handleDelete = async () => {
-    if (selectedProduct) {
-      try {
-        console.log("Eliminar producto:", selectedProduct);
-        await deleteProducto(selectedProduct.id_producto).unwrap();
-        setOpenAlert(false);
-        setSelectedProduct(null);
-      } catch (error) {
-        console.log("Error al eliminar Producto", error);
-      }
-    }
+  const handleDelete = (row) => {
+    console.log("Eliminar insump:", row);
+    // Aquí puedes implementar lógica para eliminar el producto
   };
 
   return (
@@ -200,10 +178,10 @@ const Productos = () => {
           variant="contained"
           color="primary"
           startIcon={<Add />}
-          sx={{ textTransform: "none" /* , borderRadius: "10%" */ }}
+          sx={{ textTransform: "none" }}
           onClick={() => setOpen(true)}
         >
-          Nuevo Producto
+          Nuevo Insumo
         </Button>
       </Box>
 
@@ -223,7 +201,13 @@ const Productos = () => {
       >
         <DataGrid
           getRowId={(row) => row.id_producto}
-          rows={rows}
+          rows={
+            rows /* productos.map((producto) => ({
+            ...producto,
+            id: producto.id_producto, // Asegurarse de tener un campo `id` único
+            image: producto.image || "https://via.placeholder.com/50", // Manejo de imagen por defecto
+          })) */
+          }
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5, 10, 20]}
@@ -233,25 +217,15 @@ const Productos = () => {
           onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
         />
       </Box>
-      <AlertDialog
-        openAlert={openAlert}
-        title="¿Eliminar Producto?"
-        onConfirm={handleDelete}
-        onCloseAlert={() => {
-          setOpenAlert(false);
-          setSelectedProduct(null);
-        }}
-        message="¿Estás seguro que desear eliminar este producto?"
-      />
       <ModalForm
         open={open}
         onClose={() => setOpen(false)}
         onSubmit={handleSubmit}
         fields={fields}
-        title={"Añadir Nuevo Producto"}
+        title={"Añadir Nuevo Insumo"}
       />
     </Box>
   );
 };
 
-export default Productos;
+export default Insumos;

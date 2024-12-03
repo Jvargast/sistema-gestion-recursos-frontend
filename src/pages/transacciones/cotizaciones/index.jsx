@@ -6,9 +6,11 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
 import DataGridCustomToolbar from "../../../components/common/DataGridCustomToolbar";
 import { useGetAllTransaccionesQuery } from "../../../services/ventasApi";
-/* import { EditAttributesOutlined } from "@mui/icons-material"; */
+import CustomNewButton from "../../../components/common/CustomNewButton";
+import { useGetAllClientesQuery } from "../../../services/clientesApi";
+import ModalForm from "../../../components/common/ModalForm";
 
-const Pedidos = () => {
+const Cotizaciones = () => {
   const theme = useTheme();
 
   // values to be sent to the backend
@@ -19,8 +21,14 @@ const Pedidos = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading, error } = useGetAllTransaccionesQuery({
-    tipo_transaccion: "pedido",
+    tipo_transaccion: "cotizacion",
+    /* sort: JSON.stringify(sort), */
+    search,
   });
+  const { data: clientes, isLoadingClients } = useGetAllClientesQuery();
+  const [selectedRows, setSelectedRows] = useState([]);
+  // Modal agregar cotizaciones
+  const [open, setOpen] = useState(false);
 
   // Mapear filas para la tabla
   const rows = data
@@ -88,16 +96,52 @@ const Pedidos = () => {
           alignItems="center"
           gap={1}
         >
-          <IconButton color="primary" onClick={() => handleEdit(params.row)}>
+          <IconButton
+            color="primary"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleEdit(params.row);
+            }}
+          >
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row)}>
+          <IconButton
+            color="error"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleDelete(params.row);
+            }}
+          >
             <DeleteIcon />
           </IconButton>
         </Box>
       ),
     },
   ];
+
+  const fields = [
+    {
+      name: "id_cliente",
+      label: "Nombre del Cliente",
+      type: "select",
+      options: clientes
+        ? clientes?.map((cliente) => ({
+            value: cliente.rut,
+            label: cliente.nombre,
+          }))
+        : [],
+      defaultValue: "",
+    },
+    { name: "observaciones", label: "Observaciones", type: "text" },
+    { name: "id_metodo_pago", label: "Método de pago", type: "text" },
+    { name: "detalles", label: "Descripción", type: "text" },
+  ];
+
+  // Función para manejar formulario
+  const handleSubmit = (data) => {
+    console.log("Datos formulario", data);
+
+  };
 
   // Función para manejar la acción de editar
   const handleEdit = (row) => {
@@ -113,7 +157,7 @@ const Pedidos = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="Pedidos" subtitle="Lista de Pedidos" />
+      <Header title="Cotizaciones" subtitle="Lista de Cotizaciones" />
       <Box
         height="80vh"
         sx={{
@@ -141,6 +185,10 @@ const Pedidos = () => {
           },
         }}
       >
+        <CustomNewButton
+          name={"Nueva Cotización"}
+          onClick={() => setOpen(true)}
+        />
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row.id_transaccion}
@@ -149,11 +197,13 @@ const Pedidos = () => {
           rowCount={(data && data.total) || 0}
           rowsPerPageOptions={[20, 50, 100]}
           pagination
+          checkboxSelection
+          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
           page={page}
           pageSize={pageSize}
           paginationMode="server"
           sortingMode="client"
-          sx={{color:"black", fontWeight: 400}}
+          sx={{ color: "black", fontWeight: 400 }}
           onPageChange={(newPage) => setPage(newPage)}
           onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           onSortModelChange={(newSortModel) => setSort(...newSortModel)}
@@ -165,8 +215,15 @@ const Pedidos = () => {
           }}
         />
       </Box>
+      <ModalForm
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleSubmit}
+        fields={fields}
+        title={"Crear Cotización"}
+      />
     </Box>
   );
 };
 
-export default Pedidos;
+export default Cotizaciones;

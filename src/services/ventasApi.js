@@ -10,10 +10,14 @@ export const ventasApi = createApi({
   endpoints: (builder) => ({
     // Obtener todas las cotizaciones
     getAllTransacciones: builder.query({
-      query: (params) => {
+      query: (params) => ({
+        url: `/transacciones/`,
+        params,
+      }),
+        /* {
         const queryParams = new URLSearchParams(params).toString(); // Convierte el objeto params en query string
         return `/transacciones/?${queryParams}`; // Agrega los parámetros a la URL
-      },
+      }, */
       providesTags: ["Cotizacion"], // Cache de cotizaciones
       async onQueryStarted(args, { queryFulfilled }) {
         try {

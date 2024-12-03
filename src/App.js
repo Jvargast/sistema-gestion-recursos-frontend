@@ -18,6 +18,7 @@ import Clientes from "./pages/clientes";
 import Cotizaciones from "./pages/transacciones/cotizaciones";
 import Pedidos from "./pages/transacciones/pedidos";
 import Ventas from "./pages/transacciones/ventas";
+import Insumos from "./pages/insumos";
 /* import Products from "scenes/products";
 import Customers from "scenes/customers";
 import Transactions from "scenes/transactions";
@@ -49,12 +50,13 @@ function App() {
             element: <Layout />, // Layout principal
             children: [
               { path: "/", element: <Navigate to="/dashboard" replace /> },
-              { path: "/dashboard", element: <Dashboard /> },
-              { path: "/productos", element: <Productos /> },
-              { path: "/clientes", element: <Clientes /> },
+              { path: "/dashboard", element: <Dashboard /> },             
               { path: "/cotizaciones", element: <Cotizaciones/> },
               { path: "/pedidos", element: <Pedidos/> },
               { path: "/ventas", element: <Ventas/> },
+              { path: "/clientes", element: <Clientes /> },
+              { path: "/productos", element: <Productos /> },
+              { path: "/insumos", element: <Insumos /> },   
               // Agrega otras rutas aquí...
             ],
           },

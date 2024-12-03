@@ -3,8 +3,9 @@ import { Box, IconButton, useTheme } from "@mui/material";
 import Header from "../../components/common/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { useGetAllClientesQuery } from "../../services/clientesApi";
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CustomNewButton from "../../components/common/CustomNewButton";
 
 const Clientes = () => {
   const theme = useTheme();
@@ -135,16 +136,16 @@ const Clientes = () => {
           },
           "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
             color: `${theme.palette.secondary[200]} !important`,
-            
           },
         }}
       >
+        <CustomNewButton name={"Nuevo Cliente"} />
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row.rut}
           rows={rows || []}
           columns={columns}
-          sx={{color:"black", fontWeight: 400}}
+          sx={{ color: "black", fontWeight: 400 }}
         />
       </Box>
     </Box>

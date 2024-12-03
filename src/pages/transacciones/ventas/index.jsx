@@ -6,9 +6,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
 import DataGridCustomToolbar from "../../../components/common/DataGridCustomToolbar";
 import { useGetAllTransaccionesQuery } from "../../../services/ventasApi";
+import CustomNewButton from "../../../components/common/CustomNewButton";
+/* import { EditAttributesOutlined } from "@mui/icons-material"; */
 
-
-const Cotizaciones = () => {
+const Ventas = () => {
   const theme = useTheme();
 
   // values to be sent to the backend
@@ -19,7 +20,8 @@ const Cotizaciones = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading, error } = useGetAllTransaccionesQuery({
-    tipo_transaccion: "cotizacion",
+    tipo_transaccion: "venta",
+    search
   });
 
   // Mapear filas para la tabla
@@ -113,7 +115,7 @@ const Cotizaciones = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="Cotizaciones" subtitle="Lista de Cotizaciones" />
+      <Header title="Ventas" subtitle="Lista de Ventas" />
       <Box
         height="80vh"
         sx={{
@@ -141,6 +143,7 @@ const Cotizaciones = () => {
           },
         }}
       >
+        <CustomNewButton name={"Nueva Venta"}/ >
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row.id_transaccion}
@@ -169,4 +172,4 @@ const Cotizaciones = () => {
   );
 };
 
-export default Cotizaciones;
+export default Ventas;

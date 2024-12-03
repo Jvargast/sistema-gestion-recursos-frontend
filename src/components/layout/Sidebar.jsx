@@ -13,6 +13,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   SettingsOutlined,
   ChevronLeft,
@@ -35,7 +36,7 @@ import {
 } from "@mui/icons-material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
-import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
+import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
@@ -277,7 +278,7 @@ const Sidebar = ({
           <Box /* position="absolute" */ bottom="2rem">
             <Divider />
             <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
-              <Box
+              {/* <Box
                 component="img"
                 alt="profile"
                 src={profileImage}
@@ -285,7 +286,10 @@ const Sidebar = ({
                 width="40px"
                 borderRadius="50%"
                 sx={{ objectFit: "cover" }}
-              />
+              /> */}
+              <Box>
+                <AccountCircleIcon fontSize="large" />
+              </Box>
               <Box textAlign="left">
                 <Typography
                   fontWeight="bold"

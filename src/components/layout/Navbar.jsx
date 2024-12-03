@@ -11,6 +11,7 @@ import FlexBetween from "./FlexBetween";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode } from "../../state/reducers/globalSlice";
 import profileImage from "../../assets/images/profile.jpeg";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   AppBar,
   Button,
@@ -30,9 +31,8 @@ import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
-  const mode = useSelector((state) => state.global.mode)
+  const mode = useSelector((state) => state.global.mode);
   const theme = useTheme();
-
 
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
@@ -64,13 +64,18 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         {/* LEFT SIDE */}
         <FlexBetween>
           <IconButton
-            sx={{ display: `${isNonMobile ? "" : "none"}`, color: `${mode  === "dark" ? "#FFFFFF":"#000000"}` }}
+            sx={{
+              display: `${isNonMobile ? "" : "none"}`,
+              color: `${mode === "dark" ? "#FFFFFF" : "#000000"}`,
+            }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
             <MenuIcon />
           </IconButton>
           <FlexBetween
-            backgroundColor={theme.palette.mode === "dark" ? "#000000":"#FFFFFF"}
+            backgroundColor={
+              theme.palette.mode === "dark" ? "#000000" : "#FFFFFF"
+            }
             borderRadius="2rem"
             gap="3rem"
             p="0.1rem 1.5rem"
@@ -89,7 +94,6 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
             {theme.palette.mode === "dark" ? (
               <LightModeOutlined sx={{ fontSize: "25px", color: "#ffffff" }} />
             ) : (
-              
               <DarkModeOutlined sx={{ fontSize: "25px", color: "#0D497D" }} />
             )}
           </IconButton>
@@ -106,13 +110,9 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
           </IconButton>
           <IconButton>
             {theme.palette.mode === "dark" ? (
-              <SettingsOutlined
-                sx={{ fontSize: "25px" , color: "#ffffff" }}
-              />
+              <SettingsOutlined sx={{ fontSize: "25px", color: "#ffffff" }} />
             ) : (
-              <SettingsOutlined
-                sx={{ fontSize: "25px" , color: "#0D497D" }}
-              />
+              <SettingsOutlined sx={{ fontSize: "25px", color: "#0D497D" }} />
             )}
           </IconButton>
 
@@ -127,7 +127,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 gap: "1rem",
               }}
             >
-              <Box
+              {/* <Box
                 component="img"
                 alt="profile"
                 src={profileImage}
@@ -135,18 +135,31 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 width="32px"
                 borderRadius="50%"
                 sx={{ objectFit: "cover" }}
-              />
+              /> */}
+              <Box>
+                <AccountCircleIcon fontSize="large" />
+              </Box>
               <Box textAlign="left">
                 <Typography
                   fontWeight="bold"
                   fontSize="0.85rem"
-                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
+                  sx={{
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.primary[100]
+                        : theme.palette.secondary[100],
+                  }}
                 >
                   {user.nombre}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
-                  sx={{ color: theme.palette.mode === "dark" ? theme.palette.primary[100] : theme.palette.secondary[100] }}
+                  sx={{
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.primary[100]
+                        : theme.palette.secondary[100],
+                  }}
                 >
                   {user.rol.nombre}
                 </Typography>
@@ -161,7 +174,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               onClose={handleClose}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
-              <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+              <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
             </Menu>
           </FlexBetween>
         </FlexBetween>

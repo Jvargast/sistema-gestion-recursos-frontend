@@ -6,9 +6,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
 import DataGridCustomToolbar from "../../../components/common/DataGridCustomToolbar";
 import { useGetAllTransaccionesQuery } from "../../../services/ventasApi";
+import CustomNewButton from "../../../components/common/CustomNewButton";
 /* import { EditAttributesOutlined } from "@mui/icons-material"; */
 
-const Ventas = () => {
+const Pedidos = () => {
   const theme = useTheme();
 
   // values to be sent to the backend
@@ -19,7 +20,7 @@ const Ventas = () => {
   const [searchInput, setSearchInput] = useState("");
 
   const { data, isLoading, error } = useGetAllTransaccionesQuery({
-    tipo_transaccion: "venta",
+    tipo_transaccion: "pedido",
   });
 
   // Mapear filas para la tabla
@@ -113,7 +114,7 @@ const Ventas = () => {
 
   return (
     <Box m="1.5rem 2.5rem">
-      <Header title="Ventas" subtitle="Lista de Ventas" />
+      <Header title="Pedidos" subtitle="Lista de Pedidos" />
       <Box
         height="80vh"
         sx={{
@@ -141,6 +142,7 @@ const Ventas = () => {
           },
         }}
       >
+        <CustomNewButton name={"Nuevo Pedido"}/ >
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row.id_transaccion}
@@ -169,4 +171,4 @@ const Ventas = () => {
   );
 };
 
-export default Ventas;
+export default Pedidos;
