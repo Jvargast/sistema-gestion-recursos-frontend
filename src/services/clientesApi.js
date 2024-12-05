@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_URL } from "./apiBase";
 
 export const clientesApi = createApi({
   reducerPath: "clientesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
     credentials: "include", // Para enviar/recibir cookies si es necesario
   }),
   tagTypes: ["Cliente"], // Identificador para invalidar cache

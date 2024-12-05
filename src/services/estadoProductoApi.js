@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const estadoProductoApi = createApi({
   reducerPath: "estadoProductoApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_URL + "/estados-productos", // Asegúrate de tener configurada esta variable
+    baseUrl: process.env.REACT_APP_BASE_URL + "/estados-productos", // Asegúrate de tener configurada esta variable
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["EstadosProductos"], // Para manejar la invalidación de caché

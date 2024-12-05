@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_URL } from "./apiBase";
+
 export const categoriaApi = createApi({
   reducerPath: "categoriaApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_URL + "/categorias-productos", // Asegúrate de tener configurada esta variable
+    baseUrl: process.env.process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL + "/categorias-productos", // Asegúrate de tener configurada esta variable
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["Categoria"], // Para manejar la invalidación de caché
@@ -18,7 +19,7 @@ export const categoriaApi = createApi({
       async onQueryStarted(args, {queryFulfilled}) {
         try {
             const {data} = await queryFulfilled;
-            console.log("Lista de categorias obtenidas:", data);
+            console.log("Lista de categorias obtenida:", data);
         } catch (error) {
             console.log("Error al obtener la lista de categorias", error)
         }

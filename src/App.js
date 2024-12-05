@@ -64,6 +64,7 @@ function App() {
       },
     ],
     {
+      basename: "/sistema-gestion-recursos-frontend",
       // Habilitar banderas de React Router v7
       future: {
         v7_startTransition: true, // Ya estaba activada
