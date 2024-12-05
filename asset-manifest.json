@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/sistema-gestion-recursos-frontend/static/css/main.12b86141.css",
-    "main.js": "/sistema-gestion-recursos-frontend/static/js/main.392d0a79.js",
+    "main.js": "/sistema-gestion-recursos-frontend/static/js/main.1358c588.js",
     "static/media/profile.jpeg": "/sistema-gestion-recursos-frontend/static/media/profile.42c126d38ecd6a94419f.jpeg",
     "static/media/logoLogin.png": "/sistema-gestion-recursos-frontend/static/media/logoLogin.9c76f2914bc65c577f54.png",
     "index.html": "/sistema-gestion-recursos-frontend/index.html",
     "main.12b86141.css.map": "/sistema-gestion-recursos-frontend/static/css/main.12b86141.css.map",
-    "main.392d0a79.js.map": "/sistema-gestion-recursos-frontend/static/js/main.392d0a79.js.map"
+    "main.1358c588.js.map": "/sistema-gestion-recursos-frontend/static/js/main.1358c588.js.map"
   },
   "entrypoints": [
     "static/css/main.12b86141.css",
-    "static/js/main.392d0a79.js"
+    "static/js/main.1358c588.js"
   ]
 }
