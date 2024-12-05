@@ -4,7 +4,7 @@ import { API_URL } from "./apiBase";
 export const ventasEstadisticasApi = createApi({
   reducerPath: "ventasEstadisticasApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL + "/analisis/ventas",
+    baseUrl: /* process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : */ API_URL + "/analisis/ventas",
     credentials: "include",
   }),
   tagTypes: ["AnalisisVenta"],
