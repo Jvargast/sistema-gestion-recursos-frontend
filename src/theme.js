@@ -19,6 +19,7 @@ export const tokensDark = {
         200: "#bdd1ee",
         300: "#9cbbe6",
         400: "#7ba4dd",
+        450: "#c5cfed",
         500: "#FFFFFF", //adjustes
         600: "#F0F3FC", //adjusted
         700: "#365580",
@@ -92,6 +93,7 @@ export const tokensDark = {
                 ...tokensLight.primary,
                 main: tokensDark.grey[50],
                 light: tokensDark.grey[100],
+                charts: tokensDark.grey[900],
               },
               secondary: {
                 ...tokensLight.secondary,
@@ -103,9 +105,10 @@ export const tokensDark = {
                 main: tokensDark.grey[500],
               },
               background: {
-                default: tokensDark.grey[0],
+                default: tokensDark.primary[600],
                 alt: tokensDark.grey[50],
-                search: tokensDark.grey[200]
+                search: tokensDark.grey[200],
+                charts: tokensDark.primary[500],
               },
             }),
       },

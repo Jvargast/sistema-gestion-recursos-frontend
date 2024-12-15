@@ -1,14 +1,11 @@
 import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { useGetAuthenticatedUserQuery } from "../../services/authApi";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import LoaderComponent from "../common/LoaderComponent";
+import { useSelector } from "react-redux";
 const ProtectedRoute = () => {
-  const { data: user, isLoading, isError } = useGetAuthenticatedUserQuery();
-
-  if (isLoading) return <div> <LoaderComponent/> </div>;
-  if (isError || !user) return <Navigate to="/login" replace />;
-
-  return <Outlet />;
+  const location = useLocation();
+  const {isAuthenticated} = useSelector((state) => state.auth);
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoute;

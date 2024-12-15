@@ -90,13 +90,13 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
 
         {/* RIGHT SIDE */}
         <FlexBetween gap="1.5rem">
-          <IconButton onClick={() => dispatch(setMode())}>
+          {/* <IconButton onClick={() => dispatch(setMode())}>
             {theme.palette.mode === "dark" ? (
               <LightModeOutlined sx={{ fontSize: "25px", color: "#ffffff" }} />
             ) : (
               <DarkModeOutlined sx={{ fontSize: "25px", color: "#0D497D" }} />
             )}
-          </IconButton>
+          </IconButton> */}
           <IconButton>
             {theme.palette.mode === "dark" ? (
               <NotificationsNoneOutlinedIcon

@@ -1,48 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import {
-  useLoginMutation,
-  useGetAuthenticatedUserQuery,
-} from "../../services/authApi";
-import logoImage from "../../assets/images/logoLogin.png"
+
+import logoImage from "../../assets/images/logoLogin.png";
+import { useLoginMutation } from "../../services/authApi";
+import { useSelector } from "react-redux";
 
 const Login = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ rut: "", password: "" });
-  const [login] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCredentials({ ...credentials, [name]: value });
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
       await login(credentials).unwrap();
-      setShouldFetchUser(true);
-      //if (data)
-      //navigate("/dashboard"); // Redirige al dashboard
+      navigate("/dashboard"); // Redirige al dashboard
     } catch (error) {
       alert("Error al iniciar sesión");
       console.error(error);
     }
   };
-  // Estado para habilitar el query /auth/me
-  const [shouldFetchUser, setShouldFetchUser] = useState(false);
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useGetAuthenticatedUserQuery(undefined, {
-    skip: !shouldFetchUser, // No se ejecuta automáticamente
-  });
-  // Redirige al dashboard una vez que se obtiene el usuario
+
+  // Redirige automáticamente si ya está autenticado
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true }); // Redirige al dashboard
     }
-  }, [user, navigate]);
+  }, [isAuthenticated, navigate]);
+
   return (
     <Box
       height="100vh"
@@ -52,9 +44,6 @@ const Login = () => {
       flexDirection="column"
       sx={{ backgroundColor: "#f5f5f5" }}
     >
-      {/* <Typography variant="h4" sx={{ mb: 4 }}>
-        Aguas Valentino
-      </Typography> */}
       <Box justifyContent="center" display="flex" alignItems="center">
         <Box
           display="flex"
@@ -97,7 +86,7 @@ const Login = () => {
         <Button variant="contained" onClick={handleLogin} fullWidth>
           {isLoading ? "Cargando..." : "Iniciar sesión"}
         </Button>
-        {isError && <p>Error al cargar datos del usuario</p>}
+        {/* {isError && <p>Error al cargar datos del usuario</p>} */}
       </Box>
     </Box>
   );

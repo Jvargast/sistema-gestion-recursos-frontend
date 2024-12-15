@@ -13,11 +13,11 @@ const StatBox = ({ title, value, increase, icon, description }) => {
       justifyContent="space-between"
       p="1.25rem 1rem"
       flex="1 1 100%"
-      backgroundColor={theme.palette.background.alt}
+      backgroundColor={theme.palette.background.charts}
       borderRadius="0.55rem"
     >
       <FlexBetween>
-        <Typography variant="h6" sx={{ color: theme.palette.secondary[100] }}>
+        <Typography variant="h6" sx={{ color: theme.palette.secondary[100], fontWeight:800, fontSize: "1.2rem" }}>
           {title}
         </Typography>
         {icon}
@@ -26,7 +26,7 @@ const StatBox = ({ title, value, increase, icon, description }) => {
       <Typography
         variant="h3"
         fontWeight="600"
-        sx={{ color: theme.palette.secondary[200] }}
+        sx={{ color: theme.palette.secondary[100] }}
       >
         {value}
       </Typography>
@@ -34,7 +34,7 @@ const StatBox = ({ title, value, increase, icon, description }) => {
         <Typography
           variant="h5"
           fontStyle="italic"
-          sx={{ color: theme.palette.secondary.light }}
+          sx={{ color: theme.palette.secondary[100] }}
         >
           {increase}
         </Typography>

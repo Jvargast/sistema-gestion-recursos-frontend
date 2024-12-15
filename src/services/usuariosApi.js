@@ -4,7 +4,7 @@ import { API_URL } from "./apiBase";
 export const usuariosApi = createApi({
   reducerPath: "usuariosApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: /* process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : */ API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
     credentials: "include",
   }),
   tagTypes: ["User"],

@@ -17,8 +17,8 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import BreakdownChart from "../../components/layout/BreakDownChart";
-/*import OverviewChart from "components/OverviewChart";
-import { useGetDashboardQuery } from "state/api";*/
+/* import OverviewChart from "../../components/layout/OverviewChart"; */
+/*import { useGetDashboardQuery } from "state/api";*/
 import StatBox from "../../components/layout/StatBox";
 /* import { useGetAllClientesQuery } from "../../services/clientesApi"; */
 import MonthlySalesChart from "../../components/layout/MonthlySalesChart";
@@ -71,8 +71,8 @@ const Dashboard = () => {
         <Box>
           <Button
             sx={{
-              backgroundColor: theme.palette.secondary.light,
-              color: theme.palette.background.alt,
+              backgroundColor: theme.palette.grey[300],
+              color: theme.palette.primary[400],
               fontSize: "14px",
               fontWeight: "bold",
               padding: "10px 20px",
@@ -87,7 +87,7 @@ const Dashboard = () => {
         mt="20px"
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
-        gap="20px"
+        gap="10px"
       >
         {/* Gráfico de Ventas Anuales */}
         <Box gridColumn="span 12">
@@ -117,94 +117,58 @@ const Dashboard = () => {
           description="Desde el mes pasado"
           icon={
             <Email
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[100], fontSize: "26px" }}
             />
           }
         />
         <StatBox
           title="Ventas del día"
-          value={[]}
-          increase="+21%"
-          description="Since last month"
+          value={"100"}
+          increase={`${null}`?  "+21%" : `${null}`}
+          description="Desde ayer"
           icon={
             <PointOfSale
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[100], fontSize: "26px" }}
             />
           }
         />
         <Box
           gridColumn="span 8"
           gridRow="span 2"
-          backgroundColor={theme.palette.background.alt}
+          backgroundColor={theme.palette.background.charts}
           p="1rem"
           borderRadius="0.55rem"
         >
-          {/* <OverviewChart view="sales" isDashboard={true} /> */}
+          {"hola"}
+        {/* <OverviewChart view="sales" isDashboard={true} /> */}
         </Box>
         <StatBox
           title="Ventas Mensuales"
-          value={[]}
+          value={"30"}
           increase="+5%"
-          description="Since last month"
+          description="Desde el mes pasado"
           icon={
             <PersonAdd
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[100], fontSize: "26px" }}
             />
           }
         />
         <StatBox
           title="Ventas Anuales"
-          value={[]}
+          value={"40"}
           increase="+43%"
-          description="Since last month"
+          description="Desde el año pasado"
           icon={
             <Traffic
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[100], fontSize: "26px" }}
             />
           }
         />
-
-        {/* ROW 2 */}
-        <Box
-          gridColumn="span 8"
-          gridRow="span 3"
-          sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-              borderRadius: "5rem",
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[100],
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: theme.palette.background.alt,
-            },
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[100],
-              borderTop: "none",
-            },
-            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.secondary[200]} !important`,
-            },
-          }}
-        >
-          <DataGrid
-            loading={ isLoading || !estadisticas }
-            getRowId={(row) => row._id}
-            rows={/* (data && data.transactions) || */ []}
-            columns={columns}
-          />
-        </Box>
+  
         <Box
           gridColumn="span 4"
           gridRow="span 3"
-          backgroundColor={theme.palette.background.alt}
+          backgroundColor={theme.palette.primary[500]}
           p="1.5rem"
           borderRadius="0.55rem"
         >

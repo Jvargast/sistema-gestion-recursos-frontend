@@ -1,0 +1,389 @@
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  CircularProgress,
+  IconButton,
+} from "@mui/material";
+import {
+  useGetTransaccionByIdQuery,
+  useChangeEstadoMutation,
+  useChangeTipoTransaccionMutation,
+  useChangeDetallesInfoMutation,
+  /*   useCompleteTransactionMutation,
+  useFinalizarTransaccionMutation, */
+} from "../../../services/ventasApi";
+import { useGetAllEstadosQuery } from "../../../services/estadoTransaccionApi";
+import LoaderComponent from "../../../components/common/LoaderComponent";
+import { DeleteOutline } from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import ProductDetails from "./ProductDetails";
+import DetalleTransaccion from "./DetalleTransaccion";
+
+const EditarCotizacion = () => {
+  const { id } = useParams(); // Obtener el ID de la cotización desde la URL
+  const navigate = useNavigate();
+
+  // Obtener la cotización por ID
+  const {
+    data: transaccionData,
+    isLoading,
+    isError,
+  } = useGetTransaccionByIdQuery(id);
+
+  // Obtener estados desde el backend
+  const { data: estadosData } = useGetAllEstadosQuery({
+    tipo_transaccion: "cotizacion",
+  });
+
+
+  // Estado para el formulario
+  const [formData, setFormData] = useState({
+    cliente: {},
+    usuario: {},
+    estado: {},
+    detalles: [],
+    tipo_transaccion: "",
+    total: "",
+    observaciones: "",
+  });
+
+  // Mutación para actualizar la cotización
+  // Mutaciones para las diferentes acciones
+  const [changeEstado] = useChangeEstadoMutation();
+  const [changeTipo] = useChangeTipoTransaccionMutation();
+  const [changeDetalles] = useChangeDetallesInfoMutation();
+  /* const [completeTransaction] = useCompleteTransactionMutation();
+  const [finalizeTransaction] = useFinalizarTransaccionMutation(); */
+
+  useEffect(() => {
+    if (transaccionData) {
+      setFormData({
+        cliente: transaccionData.transaccion.cliente || {},
+        usuario: transaccionData.transaccion.usuario || {},
+        estado: transaccionData.transaccion.estado || {},
+        detalles: transaccionData.detalles || [],
+        tipo_transaccion: transaccionData.transaccion.tipo_transaccion || "",
+        total: transaccionData.transaccion.total || "",
+        observaciones: transaccionData.transaccion.observaciones || "",
+      });
+    }
+  }, [transaccionData]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleDetalleChange = (index, field, value) => {
+    const detallesActualizados = [...formData.detalles];
+    detallesActualizados[index][field] = value;
+    setFormData((prev) => ({ ...prev, detalles: detallesActualizados }));
+  };
+
+  const handleRemoveDetalle = (index) => {
+    const detallesActualizados = formData.detalles.filter(
+      (_, i) => i !== index
+    );
+    setFormData((prev) => ({ ...prev, detalles: detallesActualizados }));
+  };
+
+  const handleAddDetalle = () => {
+    const newDetalles = [
+      ...formData.detalles,
+      {
+        id_producto: "",
+        cantidad: "",
+        precio_unitario: "",
+        nombre_producto: "",
+      },
+    ];
+    setFormData((prev) => ({ ...prev, detalles: newDetalles }));
+  };
+
+  const handleSaveDetalles = async () => {
+    try {
+      await changeDetalles({ id, detalles: formData.detalles }).unwrap();
+      alert("Detalles actualizados exitosamente");
+    } catch (error) {
+      alert(`Error al actualizar los detalles: ${error.message}`);
+    }
+  };
+
+  const handleAction = async (actionType) => {
+    try {
+      switch (actionType) {
+        case "changeEstado":
+          await changeEstado({
+            id,
+            id_estado_transaccion: formData.estado,
+          }).unwrap();
+          alert("Estado actualizado exitosamente");
+          break;
+        case "changeTipo":
+          await changeTipo({
+            id,
+            tipo_transaccion: formData.tipo_transaccion,
+          }).unwrap();
+          alert("Tipo de transacción actualizado exitosamente");
+          break;
+        /* case "changeDetalles":
+          await changeDetalles({ id, detalles: formData.detalles }).unwrap();
+          alert("Detalles actualizados exitosamente");
+          break; */
+        /* case "completeTransaction":
+          await completeTransaction({ id }).unwrap();
+          alert("Transacción completada exitosamente");
+          break;
+        case "finalizeTransaction":
+          await finalizeTransaction({ id }).unwrap();
+          alert("Transacción finalizada exitosamente");
+          break; */
+        default:
+          break;
+      }
+    } catch (error) {
+      alert(`Error al realizar la acción: ${error.message}`);
+    }
+  };
+
+  if (isLoading) {
+    return <LoaderComponent />;
+  }
+
+  if (isError) {
+    return (
+      <Typography color="error">Error al cargar la cotización.</Typography>
+    );
+  }
+
+  return (
+    <Box m={3}>
+      <Typography variant="h4" gutterBottom>
+        Editar Cotización
+      </Typography>
+
+      <Typography variant="h6" gutterBottom>
+        Datos del Cliente
+      </Typography>
+      <TextField
+        fullWidth
+        label="RUT"
+        value={formData.cliente.rut || ""}
+        disabled
+      />
+      <TextField
+        fullWidth
+        label="Nombre"
+        value={formData.cliente.nombre || ""}
+        disabled
+      />
+      <TextField
+        fullWidth
+        label="Dirección"
+        value={formData.cliente.direccion || ""}
+        disabled
+      />
+
+      {/* Información del Usuario */}
+
+      <Typography variant="h6" gutterBottom>
+        Creador
+      </Typography>
+      <TextField
+        fullWidth
+        label="Nombre"
+        value={formData.usuario.nombre || ""}
+        disabled
+      />
+      <TextField
+        fullWidth
+        label="Email"
+        value={formData.usuario.email || ""}
+        disabled
+      />
+      <TextField
+        fullWidth
+        label="Rut"
+        value={formData.usuario.rut || ""}
+        disabled
+      />
+
+      {/* Información del Estado */}
+
+      <Typography variant="h6" gutterBottom>
+        Estado
+      </Typography>
+      <FormControl fullWidth>
+        <InputLabel>Estado</InputLabel>
+        <Select
+          value={formData.estado.id_estado_transaccion || ""}
+          name="estado"
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              estado: { ...prev.estado, id_estado_transaccion: e.target.value },
+            }))
+          }
+        >
+          {estadosData?.map((estado) => (
+            <MenuItem
+              key={estado.id_estado_transaccion}
+              value={estado.id_estado_transaccion}
+            >
+              {estado.nombre_estado}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Información General de la Transacción */}
+      <Typography variant="h6" gutterBottom>
+        Información de la Cotización
+      </Typography>
+      <FormControl fullWidth>
+        <InputLabel>Tipo de Transacción</InputLabel>
+        <Select
+          value={formData.tipo_transaccion}
+          name="tipo_transaccion"
+          onChange={handleInputChange}
+        >
+          <MenuItem value="cotizacion">Cotización</MenuItem>
+          <MenuItem value="venta">Venta</MenuItem>
+          <MenuItem value="pedido">Pedido</MenuItem>
+        </Select>
+      </FormControl>
+      <TextField
+        fullWidth
+        label="Observaciones"
+        name="observaciones"
+        value={formData.observaciones}
+        onChange={handleInputChange}
+      />
+
+      {/* Detalles de Productos */}
+      <Typography variant="h6" gutterBottom>
+        Detalles de Productos
+      </Typography>
+      <DetalleTransaccion
+        idTransaccion={id}
+      />
+
+      {/* {formData.detalles.map((detalle, index) => (
+        <Box key={index} display="flex" alignItems="center" gap={2} mb={2}>
+          <TextField
+            label="Producto ID"
+            value={detalle.id_producto || ""}
+            disabled
+          />
+          <TextField
+            label="Nombre"
+            value={detalle.producto.nombre_producto || ""}
+            disabled
+          />
+          <TextField
+            label="Estado Producto"
+            value={detalle.producto.estado_producto || ""}
+            disabled
+          />
+          <TextField
+            label="Cantidad"
+            value={detalle.cantidad || ""}
+            onChange={(e) =>
+              handleDetalleChange(index, "cantidad", e.target.value)
+            }
+          />
+          <TextField
+            label="Precio Unitario"
+            value={detalle.precio_unitario || ""}
+            onChange={(e) =>
+              handleDetalleChange(index, "precio_unitario", e.target.value)
+            }
+          />
+          <TextField label="Subtotal" value={detalle.subtotal || 0} disabled />
+          <IconButton color="error" onClick={() => handleRemoveDetalle(index)}>
+            <DeleteOutline />
+          </IconButton>
+        </Box>
+      ))} */}
+      {/* <Button
+        startIcon={<AddIcon />}
+        variant="contained"
+        color="primary"
+        onClick={handleAddDetalle}
+      >
+        Agregar Producto
+      </Button> */}
+      <TextField
+        label="Total"
+        value={formData.total || 0}
+        disabled
+        name="total"
+        onChange={handleInputChange}
+      />
+
+      {/* Botones de Acción */}
+      <Box mt={3} display="flex" gap={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleAction("changeEstado")}
+        >
+          Cambiar Estado
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => handleAction("changeTipo")}
+        >
+          Cambiar Tipo
+        </Button>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={handleSaveDetalles}
+        >
+          Actualizar Detalles
+        </Button>
+        {/* <Button
+          variant="contained"
+          color="warning"
+          onClick={() => handleAction("completeTransaction")}
+        >
+          Completar Transacción
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleAction("finalizeTransaction")}
+        >
+          Finalizar Transacción
+        </Button> */}
+      </Box>
+
+      <Box mt={3}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => navigate("/cotizaciones")}
+          /* style={{ marginLeft: "16px" }} */
+        >
+          Cancelar
+        </Button>
+      </Box>
+    </Box>
+  );
+};
+
+export default EditarCotizacion;

@@ -43,7 +43,7 @@ const MonthlySalesChart = ({ data }) => {
   return (
     <Box
       sx={{
-        backgroundColor: theme.palette.background.alt,
+        backgroundColor: theme.palette.background.charts,
         borderRadius: "10px",
         p: "1rem",
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
@@ -54,36 +54,42 @@ const MonthlySalesChart = ({ data }) => {
         sx={{
           textAlign: "center",
           marginBottom: "1rem",
-          color: theme.palette.text.primary,
+          color: theme.palette.grey[900],
+          fontSize: "3rem",
         }}
       >
         Ventas Anuales
       </Typography>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={formattedData}>
+      <ResponsiveContainer width="100%" height={500}>
+        <LineChart
+          data={formattedData}
+          margin={{ top: 10, right: 60, left: 50, bottom: 20 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="mes" stroke={theme.palette.text.primary} />
+          <XAxis
+            dataKey="mes"
+            stroke={theme.palette.primary[100]}
+            tickMargin={10}
+          />
           <YAxis
-            stroke={theme.palette.text.primary}
+            stroke={theme.palette.primary.charts}
             domain={[0, "dataMax + 5000"]}
             tickFormatter={(value) => `$${value.toLocaleString()}`}
             allowDecimals={false}
+            tickLine={false}
+            tick={{ fontSize: "1rem", fill: theme.palette.grey[900] }}
           />
-          <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-          <Legend />
+          <Tooltip
+            contentStyle={{ color: theme.palette.primary.charts }}
+            formatter={(value) => `${value.toLocaleString()}`}
+          />
+          <Legend style={{ fontSize: "1rem" }} />
           <Line
             type="linear"
             dataKey="total"
             stroke={theme.palette.primary.main}
             strokeWidth={2}
             name="Ventas ($)"
-          />
-          <Line
-            type="stepBefore"
-            dataKey="unidades"
-            stroke={theme.palette.secondary.main}
-            strokeWidth={2}
-            name="Unidades Vendidas"
           />
         </LineChart>
       </ResponsiveContainer>

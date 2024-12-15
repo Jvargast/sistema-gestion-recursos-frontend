@@ -4,7 +4,7 @@ import { API_URL } from "./apiBase";
 export const inventarioApi = createApi({
   reducerPath: "inventarioApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: /* process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : */ API_URL + "/productos", // Asegúrate de tener configurada esta variable
+    baseUrl: (process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL) + "/productos", // Asegúrate de tener configurada esta variable
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["Producto"], // Para manejar la invalidación de caché
@@ -19,7 +19,6 @@ export const inventarioApi = createApi({
       async onQueryStarted(args, {queryFulfilled}) {
         try {
             const {data} = await queryFulfilled;
-            console.log("Lista de productos obtenida:", data);
         } catch (error) {
             console.log("Error al obtener la lista de productos", error)
         }

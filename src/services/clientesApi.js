@@ -4,7 +4,7 @@ import { API_URL } from "./apiBase";
 export const clientesApi = createApi({
   reducerPath: "clientesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: /* process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : */ API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
     credentials: "include", // Para enviar/recibir cookies si es necesario
   }),
   tagTypes: ["Cliente"], // Identificador para invalidar cache
@@ -31,7 +31,7 @@ export const clientesApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("Lista de clientes obtenida:", data);
+          /* console.log("Lista de clientes obtenida:", data); */
         } catch (error) {
           console.error("Error al obtener la lista de clientes:", error);
         }

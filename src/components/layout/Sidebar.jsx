@@ -129,7 +129,7 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Administración",
+    text: "Admin",
     icon: <AdminPanelSettingsOutlined />,
   },
   {

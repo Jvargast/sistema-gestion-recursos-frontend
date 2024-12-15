@@ -1,29 +1,40 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { setUser, logout } from "../state/reducers/authSlice";
+import { setUser, logout, setLoading } from "../state/reducers/authSlice";
 import { API_URL } from "./apiBase";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: /* process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : */ API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL
+      ? process.env.REACT_APP_BASE_URL
+      : API_URL,
     credentials: "include", // Para enviar/recibir cookies
-    tagTypes: ["Auth"], // ¿?
+    tagTypes: ["Auth"], //
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth.token;
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
-  
+
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
-        body: credentials,
+        body: {...credentials},
       }),
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        dispatch(setLoading(true)); // Activa el estado de carga
         try {
-          await queryFulfilled;
-          //console.log(data)
-          //dispatch(loginSuccess(data)); // Actualiza el estado global con los datos del usuario
+          const { data } = await queryFulfilled;
+          dispatch(setUser(data.usuario));
         } catch (error) {
           console.error("Error al iniciar sesión:", error);
+        } finally {
+          dispatch(setLoading(false));
         }
       },
     }),
@@ -32,7 +43,7 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setUser(data.user)); // Actualiza el usuario en el estado global
+          dispatch(setUser(data.usuario)); // Actualiza el usuario en el estado global
         } catch (error) {
           console.error("Error al obtener usuario autenticado:", error);
         }
@@ -46,7 +57,7 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(logout()); // Limpia el estado global al cerrar sesión
+          dispatch(logout());
         } catch (error) {
           console.error("Error al cerrar sesión:", error);
         }
