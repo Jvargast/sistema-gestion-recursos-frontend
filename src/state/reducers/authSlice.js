@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
+import ventasApi from "../../services/ventasApi";
+import { authApi } from "../../services/authApi";
 
 const initialState = {
   isAuthenticated: false,  // Indica si el usuario está autenticado
@@ -32,4 +34,11 @@ const authSlice = createSlice({
 export const {  setUser, logout, setLoading } = authSlice.actions;
 
 export default authSlice.reducer;
+
+export const resetCacheAndLogout = () => (dispatch) => {
+  // Resetea el estado global
+  dispatch(ventasApi.util.resetApiState());
+  dispatch(authApi.util.resetApiState());
+  dispatch(logout());
+};
 

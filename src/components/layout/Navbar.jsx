@@ -28,6 +28,7 @@ import {
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import { useLogoutMutation } from "../../services/authApi";
 import { useNavigate } from "react-router-dom";
+import { resetCacheAndLogout } from "../../state/reducers/authSlice";
 
 const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
   const handleLogout = async () => {
     try {
       await logout().unwrap();
+      dispatch(resetCacheAndLogout());
       navigate("/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

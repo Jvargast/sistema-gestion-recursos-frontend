@@ -33,6 +33,11 @@ export const usuariosApi = createApi({
         }
       },
     }),
+    // Obtener chofers
+    getAllChoferes: builder.query({
+      query: () => `/usuarios/choferes`,
+      providesTags: ["User"],
+    }),
     // Crear un usuario
     createUser: builder.mutation({
       query: (newUser) => ({
@@ -93,5 +98,6 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation, 
   useDeleteUserMutation, 
+  useGetAllChoferesQuery,
 } = usuariosApi;
 export default usuariosApi;

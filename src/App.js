@@ -28,6 +28,7 @@ import Cookies from "js-cookie";
 import { API_URL } from "./services/apiBase";
 import CrearCliente from "./pages/clientes/CrearCliente";
 import EditarCotizacion from "./pages/transacciones/cotizaciones/EditarCotizacion";
+import EditarPedido from "./pages/transacciones/pedidos/EditarPedido";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -96,6 +97,7 @@ function App() {
               { path: "cotizaciones", element: <Cotizaciones /> },
               { path: "cotizaciones/editar/:id", element: <EditarCotizacion /> },
               { path: "pedidos", element: <Pedidos /> },
+              { path: "pedidos/editar/:id", element: <EditarPedido /> },
               { path: "ventas", element: <Ventas /> },
               { path: "clientes", element: <Clientes /> },
               { path: "clientes/crear", element: <CrearCliente /> },

@@ -15,9 +15,7 @@ export const clientesApi = createApi({
       providesTags: ["Cliente"], // Cache de clientes
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Cliente obtenido:", data);
-          // Aquí puedes actualizar el estado global si es necesario
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al obtener cliente por ID:", error);
         }
@@ -30,8 +28,8 @@ export const clientesApi = createApi({
       providesTags: ["Cliente"], // Cache para invalidar al crear o actualizar clientes
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          /* console.log("Lista de clientes obtenida:", data); */
+          await queryFulfilled;
+
         } catch (error) {
           console.error("Error al obtener la lista de clientes:", error);
         }

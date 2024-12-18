@@ -387,3 +387,6 @@ const EditarCotizacion = () => {
 };
 
 export default EditarCotizacion;
+
+
+https://denegocios.cl/que-es-una-cotizacion-de-productos-y-o-servicios-definicion-y-ejemplos/

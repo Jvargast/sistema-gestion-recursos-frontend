@@ -20,8 +20,7 @@ export const facturasApi = createApi({
       providesTags: ["Facturas"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Lista de facturas obtenida:", data);
+          await queryFulfilled;
         } catch (error) {
           console.log("Error al obtener la lista de facturas", error);
         }

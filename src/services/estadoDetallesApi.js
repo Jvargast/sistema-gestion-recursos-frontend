@@ -1,20 +1,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_URL } from "./apiBase";
 
-export const estadosFacturaApi = createApi({
-  reducerPath: "estadosFacturaApi",
+export const estadosDetallesApi = createApi({
+  reducerPath: "estadosDetallesApi",
   baseQuery: fetchBaseQuery({
     baseUrl:
       (process.env.REACT_APP_BASE_URL
         ? process.env.REACT_APP_BASE_URL
-        : API_URL) + "/estado-factura",
+        : API_URL) + "/estado-detalle",
+    credentials: "include",
   }),
-  tagTypes: ["EstadoFactura"],
+  tagTypes: ["EstadoDetalle"],
   endpoints: (builder) => ({
     // Endpoint para obtener todos los estados de factura
-    getAllEstadosFactura: builder.query({
+    getEstadosDetalle: builder.query({
       query: () => "/",
-      providesTags: ["EstadoFactura"], // Mueve providesTags dentro del endpoint
+      providesTags: ["EstadoDetalle"], // Mueve providesTags dentro del endpoint
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -26,4 +27,4 @@ export const estadosFacturaApi = createApi({
   }),
 });
 
-export const { useGetAllEstadosFacturaQuery  } = estadosFacturaApi;
+export const { useGetEstadosDetalleQuery } = estadosDetallesApi;

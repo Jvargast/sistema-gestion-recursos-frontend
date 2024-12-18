@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
 import { useGetEstadosDetalleQuery } from "../../../services/estadoDetallesApi";
 
-const DetalleTransaccion = ({
+const DetallePedido = ({
   detallesIniciales,
   productos,
   onDetallesChange,
@@ -177,7 +177,7 @@ const DetalleTransaccion = ({
   };
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h5" fontWeight="bold" mb={1}>
         Detalles de Productos
       </Typography>
 
@@ -281,7 +281,7 @@ const DetalleTransaccion = ({
       />
 
       <Box mt={2}>
-        <Typography variant="h6">
+        <Typography variant="h5" fontWeight="bold" mb={1}>
           Total: {detalles.reduce((acc, item) => acc + (item.subtotal || 0), 0)}
         </Typography>
       </Box>
@@ -289,4 +289,4 @@ const DetalleTransaccion = ({
   );
 };
 
-export default DetalleTransaccion;
+export default DetallePedido;

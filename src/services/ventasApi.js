@@ -4,7 +4,9 @@ import { API_URL } from "./apiBase";
 export const ventasApi = createApi({
   reducerPath: "ventasApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL
+      ? process.env.REACT_APP_BASE_URL
+      : API_URL,
     credentials: "include", // Para enviar cookies si es necesario
   }),
   tagTypes: ["Transaccion"], // Identificador para invalidar cache
@@ -15,11 +17,10 @@ export const ventasApi = createApi({
         url: `/transacciones/`,
         params,
       }),
-      providesTags: ["Transaccion"], 
+      providesTags: ["Transaccion"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          //console.log("Cotizaciones obtenidas:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al obtener cotizaciones:", error);
         }
@@ -32,8 +33,7 @@ export const ventasApi = createApi({
       providesTags: ["Transaccion"],
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Transaccion obtenida:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al obtener cotización:", error);
         }
@@ -50,8 +50,7 @@ export const ventasApi = createApi({
       invalidatesTags: ["Transaccion"], // Invalida cache para actualizar automáticamente la lista
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Cotización creada exitosamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al crear cotización:", error);
         }
@@ -68,9 +67,7 @@ export const ventasApi = createApi({
       invalidatesTags: ["Transaccion"], // Invalida cache
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          
-          console.log("Estado actualizado correctamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al actualizar cotización:", error);
         }
@@ -82,14 +79,12 @@ export const ventasApi = createApi({
       query: ({ id, tipo_transaccion }) => ({
         url: `/transacciones/${id}/changeTipo`,
         method: "PUT",
-        body: {tipo_transaccion},
+        body: { tipo_transaccion },
       }),
       invalidatesTags: ["TransaccionTipo"], // Invalida cache
       async onQueryStarted(args, { queryFulfilled }) {
-        
         try {
-          const { data } = await queryFulfilled;
-          console.log("Tipo actualizado correctamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al actualizar tipo:", error);
         }
@@ -105,10 +100,8 @@ export const ventasApi = createApi({
       }),
       invalidatesTags: ["TransaccionDetalles"], // Invalida cache
       async onQueryStarted(args, { queryFulfilled }) {
-        
         try {
-          const { data } = await queryFulfilled;
-          console.log("Detalles actualizados correctamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al actualizar tipo:", error);
         }
@@ -151,20 +144,30 @@ export const ventasApi = createApi({
       },
     }),
 
-
-    // Eliminar una cotización
-    deleteCotizacion: builder.mutation({
-      query: (id) => ({
-        url: `/transacciones/${id}`,
-        method: "DELETE",
+    // Asignar una transacción a un chofer/usuario
+    asignarTransaccion: builder.mutation({
+      query: ({ id_transaccion, id_usuario }) => ({
+        url: `/transacciones/${id_transaccion}/asignar`,
+        method: "POST",
+        body: { id_usuario },
       }),
-      invalidatesTags: ["Transaccion"], // Invalida cache
+      invalidatesTags: ["Transaccion"], // Refresca las transacciones
+    }),
+
+    // Eliminar transacciones
+    deleteTransacciones: builder.mutation({
+      query: ({ ids }) => ({
+        url: `/transacciones/`, 
+        method: "PATCH",
+        body: { ids }, // Enviamos el array de IDs en el body
+      }),
+      invalidatesTags: ["Transaccion"], // Invalida el caché
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          console.log("Cotización eliminada correctamente");
+
         } catch (error) {
-          console.error("Error al eliminar cotización:", error);
+          console.error("Error al eliminar transacciones:", error);
         }
       },
     }),
@@ -173,7 +176,7 @@ export const ventasApi = createApi({
     deleteDetalle: builder.mutation({
       query: ({ id, idDetalle }) => ({
         url: `/transacciones/${id}/detalles/${idDetalle}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       invalidatesTags: ["Transaccion"],
       async onQueryStarted(args, { queryFulfilled }) {
@@ -184,7 +187,6 @@ export const ventasApi = createApi({
           console.error("Error al eliminar detalle:", error);
         }
       },
-
     }),
   }),
 });
@@ -200,7 +202,8 @@ export const {
   useFinalizarTransaccionMutation,
   useChangeDetallesInfoMutation,
   useDeleteDetalleMutation,
-  /* useDeleteCotizacionMutation, */
+  useDeleteTransaccionesMutation,
+  useAsignarTransaccionMutation,
 } = ventasApi;
 
 export default ventasApi;

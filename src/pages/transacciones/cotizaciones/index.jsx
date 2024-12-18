@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { Box, IconButton, useTheme } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Button, IconButton, useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
 import DataGridCustomToolbar from "../../../components/common/DataGridCustomToolbar";
 import {
   useGetAllTransaccionesQuery,
   useCreateTransaccionMutation,
+  useDeleteTransaccionesMutation,
 } from "../../../services/ventasApi";
 import CustomNewButton from "../../../components/common/CustomNewButton";
 import { useGetAllClientesQuery } from "../../../services/clientesApi";
@@ -16,12 +16,17 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import LoaderComponent from "../../../components/common/LoaderComponent";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../../state/reducers/notificacionSlice";
+import AlertDialog from "../../../components/common/AlertDialog";
 
 const Cotizaciones = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
   // values to be sent to the backend
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -29,11 +34,22 @@ const Cotizaciones = () => {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const { data, isLoading, error } = useGetAllTransaccionesQuery({
+  const { data, isLoading, error, refetch } = useGetAllTransaccionesQuery({
     tipo_transaccion: "cotizacion",
-    /* sort: JSON.stringify(sort), */
     search,
   });
+
+  // Estados para eliminar
+  const [openAlert, setOpenAlert] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteTransacciones] = useDeleteTransaccionesMutation();
+
+  useEffect(() => {
+    // Detecta si hay un estado de refetch
+    if (location.state?.refetch) {
+      refetch(); // Forzar refetch
+    }
+  }, [location.state, refetch]);
 
   const { data: productosData, isLoading: isLoadingProductos } =
     useGetAllProductosQuery({ search: searchTerm });
@@ -107,13 +123,13 @@ const Cotizaciones = () => {
     {
       field: "estadoNombre",
       headerName: "Estado",
-      flex: 0.4,
+      flex: 0.5,
       resizable: false,
     },
     {
-      field: "acciones",
-      headerName: "Acciones",
-      flex: 0.5,
+      field: "editar",
+      headerName: "Editar",
+      flex: 0.3,
       resizable: false,
       sortable: false,
       renderCell: (params) => (
@@ -133,15 +149,7 @@ const Cotizaciones = () => {
           >
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleDelete(params.row);
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
+
         </Box>
       ),
     },
@@ -188,16 +196,20 @@ const Cotizaciones = () => {
   // Función para manejar formulario
   const handleSubmit = async (data) => {
     try {
-      const response = await createCotizacion({
-        ...data, 
+      await createCotizacion({
+        ...data,
         tipo_transaccion: "cotizacion",
-        detalles: data.detalles, 
+        detalles: data.detalles,
       }).unwrap();
 
-      /**
-       * Falta agregar mensajes de alerta cuando se crea
-       */
-      alert("Cotización creada exitosamente");
+      dispatch(
+        showNotification({
+          message: "Cotización creada exitosamente.",
+          severity: "success",
+        })
+      );
+      setOpen(false); // Cerrar el modal
+      refetch(); // Actualizar la lista automáticamente
     } catch (error) {
       console.error("Error al crear cotización:", error);
       alert("Error al crear cotización: " + error.message);
@@ -209,22 +221,61 @@ const Cotizaciones = () => {
     navigate(`/cotizaciones/editar/${row.id_transaccion}`);
   };
 
-  // Función para manejar la acción de eliminar
-  const handleDelete = (row) => {
-    console.log("Eliminar cotización:", row);
-    // Aquí puedes implementar la lógica para eliminar la cotización
+  // Función para abrir la alerta de confirmación
+  const handleOpenDelete = () => {
+    if (selectedRows.length > 0) {
+      setOpenAlert(true);
+    } else {
+      dispatch(
+        showNotification({
+          message: "Debe seleccionar al menos una transacción.",
+          severity: "warning",
+        })
+      );
+    }
   };
 
+  // Función para eliminar transacciones
+  const handleBulkDelete = async () => {
+    try {
+      setDeleteLoading(true);
+      await deleteTransacciones({ ids: selectedRows }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Cotizaciones eliminadas correctamente.",
+          severity: "success",
+        })
+      );
+      setSelectedRows([]); // Limpiar selección
+      refetch();
+      // Refetch de datos
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al eliminar Cotizaciones: ${error.message}`,
+          severity: "error",
+        })
+      );
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  /**
+   * Eliminar varias cotizaciones logicamente
+   */
+
   if (isLoading) {
-    return <LoaderComponent/>;
+    return <LoaderComponent />;
   }
-  
+
   if (isError) {
-    return <div>Error al crear cotización: {error.message}</div>;
-  }
-  
-  if (isSuccess) {
-    navigate(0)
+    dispatch(
+      showNotification({
+        message: `Error al obtener cotizaciones: ${error.message}`,
+        severity: "error",
+      })
+    );
   }
 
   return (
@@ -254,15 +305,20 @@ const Cotizaciones = () => {
             color: theme.palette.secondary[100],
             borderTop: "none",
           },
-          /* "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[200]} !important`,
-          }, */
         }}
       >
         <CustomNewButton
           name={"Nueva Cotización"}
           onClick={() => setOpen(true)}
         />
+        <Button
+          color="error"
+          variant="contained"
+          onClick={handleOpenDelete}
+          disabled={selectedRows.length === 0 || deleteLoading}
+        >
+          Eliminar Seleccionados
+        </Button>
         <DataGrid
           loading={isLoading || !data}
           getRowId={(row) => row.id_transaccion}
@@ -295,6 +351,13 @@ const Cotizaciones = () => {
         onSubmit={handleSubmit}
         fields={fields}
         title={"Crear Cotización"}
+      />
+      <AlertDialog
+        openAlert={openAlert}
+        onCloseAlert={() => setOpenAlert(false)}
+        onConfirm={handleBulkDelete}
+        title="Confirmar Eliminación"
+        message={`¿Está seguro de que desea eliminar las ${selectedRows.length} transacciones seleccionadas?`}
       />
     </Box>
   );

@@ -11,6 +11,7 @@ import { facturasApi } from "./facturasApi";
 import { estadosFacturaApi } from "./estadosFacturaApi";
 import { pagosApi } from "./pagosApi";
 import { estadosTransaccionApi } from "./estadoTransaccionApi";
+import { estadosDetallesApi } from "./estadoDetallesApi";
 //import { ventasApi } from "./ventasApi";
 //import { proveedoresApi } from "./proveedoresApi";
 
@@ -27,6 +28,7 @@ export const apiMiddleware = [
   facturasApi.middleware,
   estadosFacturaApi.middleware,
   pagosApi.middleware,
+  estadosDetallesApi.middleware,
   /*ventasApi.middleware,
   proveedoresApi.middleware, */
 ];
@@ -43,7 +45,8 @@ export const apiReducers = {
   [ventasEstadisticasApi.reducerPath]: ventasEstadisticasApi.reducer,
   [facturasApi.reducerPath]: facturasApi.reducer,
   [estadosFacturaApi.reducerPath]: estadosFacturaApi.reducer,
-  [pagosApi.reducerPath]: pagosApi.reducer
+  [pagosApi.reducerPath]: pagosApi.reducer,
+  [estadosDetallesApi.reducerPath]: estadosDetallesApi.reducer,
   /*[ventasApi.reducerPath]: ventasApi.reducer,
   [proveedoresApi.reducerPath]: proveedoresApi.reducer, */
 };
@@ -61,6 +64,7 @@ export default {
   facturasApi,
   estadosFacturaApi,
   pagosApi,
+  estadosDetallesApi
   /*ventasApi,
   proveedoresApi, */
 };

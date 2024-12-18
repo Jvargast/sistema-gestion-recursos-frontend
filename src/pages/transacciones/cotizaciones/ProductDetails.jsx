@@ -35,7 +35,6 @@ const ProductDetails = ({ value, onChange, productos, setSearchTerm }) => {
 
     detailToUpdate[field] = newValue;
 
-    console.log("Detalles actualizados:", updatedDetails); 
     setDetails(updatedDetails);
     onChange(updatedDetails);
   };

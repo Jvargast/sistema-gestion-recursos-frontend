@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -10,6 +10,8 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   useGetTransaccionByIdQuery,
   useChangeEstadoMutation,
@@ -22,9 +24,11 @@ import DetalleTransaccion from "./DetalleTransaccion";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
+import { API_URL } from "../../../services/apiBase";
+import AlertDialog from "../../../components/common/AlertDialog";
 
 const EditarCotizacion = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +39,7 @@ const EditarCotizacion = () => {
     data: transaccionData,
     isLoading,
     isError,
-    refetch
+    refetch,
   } = useGetTransaccionByIdQuery(id);
 
   // Obtener estados desde el backend
@@ -52,6 +56,8 @@ const EditarCotizacion = () => {
     tipo_transaccion: "",
     total: "",
     observaciones: "",
+    fecha_creacion: "",
+    pagos: [],
   });
 
   // Mutaciones para las diferentes acciones
@@ -59,29 +65,36 @@ const EditarCotizacion = () => {
   const [changeTipo] = useChangeTipoTransaccionMutation();
   const [changeDetalles] = useChangeDetallesInfoMutation();
 
+  const detallesInicializados = useMemo(() => {
+    if (!transaccionData?.detalles) return [];
+    return transaccionData.detalles.map((detalle) => ({
+      id_detalle_transaccion: detalle.id_detalle_transaccion,
+      cantidad: detalle.cantidad || 0,
+      precio_unitario: detalle.precio_unitario || 0,
+      subtotal: detalle.subtotal || 0,
+      id_producto: detalle.id_producto,
+      producto: detalle.producto,
+      estado_producto_transaccion: detalle.estado_producto_transaccion,
+      estado: detalle.estado || {},
+    }));
+  }, [transaccionData]);
+
   useEffect(() => {
     if (transaccionData) {
       setFormData({
         cliente: transaccionData.transaccion.cliente || {},
         usuario: transaccionData.transaccion.usuario || {},
         estado: transaccionData.transaccion.estado || {},
-        detalles: transaccionData.detalles.map(detalle => ({
-          id_detalle_transaccion: detalle.id_detalle_transaccion, // Incluye el campo aquí
-          cantidad: detalle.cantidad || 0,
-          precio_unitario: detalle.precio_unitario || 0,
-          subtotal: detalle.subtotal || 0,
-          id_producto: detalle.id_producto,
-          producto: detalle.producto,
-          estado_producto_transaccion: detalle.estado_producto_transaccion,
-          estado: detalle.estado || {}
-        })) || [],
+        detalles: detallesInicializados,
         tipo_transaccion: transaccionData.transaccion.tipo_transaccion || "",
         total: transaccionData.transaccion.total || "",
         observaciones: transaccionData.transaccion.observaciones || "",
+        fecha_creacion: transaccionData.transaccion.fecha_creacion || "",
+        pagos: transaccionData.pago || [],
       });
     }
-  }, [transaccionData]);
- 
+  }, [transaccionData, detallesInicializados]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -89,7 +102,6 @@ const EditarCotizacion = () => {
       [name]: value,
     }));
   };
-
 
   const handleAction = async (actionType) => {
     try {
@@ -99,46 +111,120 @@ const EditarCotizacion = () => {
             id,
             id_estado_transaccion: formData.estado,
           }).unwrap();
-          dispatch(showNotification({ message: "Estado actualizado exitosamente", severity: "success" }));
+          dispatch(
+            showNotification({
+              message: "Estado actualizado exitosamente",
+              severity: "success",
+            })
+          );
+          navigate("/cotizaciones", { state: { refetch: true } });
           break;
         case "changeTipo":
           await changeTipo({
             id,
             tipo_transaccion: formData.tipo_transaccion,
           }).unwrap();
-          dispatch(showNotification({ message: "Tipo de transacción actualizado exitosamente", severity: "success" }));
+          dispatch(
+            showNotification({
+              message: "Tipo de transacción actualizado exitosamente",
+              severity: "success",
+            })
+          );
+          navigate("/cotizaciones", { state: { refetch: true } });
           break;
         case "actualizarDetalles":
           const detallesPreparados = formData.detalles.map((detalle) => {
             if (!detalle.id_detalle_transaccion) {
-              // Si no tiene id_detalle_transaccion, se marca para creación
-              return {
-                ...detalle,
-                nuevo: true, // Este flag puede ser interpretado por el backend
-              };
+              return { ...detalle, nuevo: true }; // Marcar nuevos detalles
             }
             return detalle;
           });
-  
-          await changeDetalles({
-            id,
-            detalles: detallesPreparados,
-          }).unwrap();
-  
-          dispatch(
-            showNotification({
-              message: "Detalles actualizados exitosamente",
-              severity: "success",
-            })
-          );
-          await refetch(); // <-- Refresca los datos después de actualizar
+
+          try {
+            // Realizar la mutación
+            const response = await changeDetalles({
+              id,
+              detalles: detallesPreparados,
+            }).unwrap();
+            await refetch();
+            dispatch(
+              showNotification({
+                message:
+                  response.message || "Detalles actualizados exitosamente",
+                severity: "success",
+              })
+            );
+            navigate("/cotizaciones", { state: { refetch: true } }); // Redireccionar al listado
+          } catch (error) {
+            dispatch(
+              showNotification({
+                message: `Error: ${
+                  error.data?.error || "No se pudo actualizar"
+                }`,
+                severity: "error",
+              })
+            );
+          }
           break;
 
         default:
           break;
       }
     } catch (error) {
-      dispatch(showNotification({ message: `Error: ${error.data.error}`, severity: "error" }));
+      dispatch(
+        showNotification({
+          message: `Error: ${error.data.error}`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  //modal advertencia
+  const [openAlert, setOpenAlert] = useState(false);
+
+  // exportar PDF
+  const handleExportPdf = async () => {
+    try {
+      // Realiza la llamada HTTP manualmente
+
+      const response = await fetch(
+        `${
+          process.env.REACT_APP_BASE_URL || API_URL
+        }/transacciones/exportar-pdf/${id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al exportar la cotización");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Crear enlace temporal para descargar el archivo
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `cotizacion_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      dispatch(
+        showNotification({
+          message: "Cotización exportada correctamente.",
+          severity: "success",
+        })
+      );
+    } catch (error) {
+      console.error("Error al exportar la cotización:", error);
+      dispatch(
+        showNotification({
+          message: "Error al exportar la cotización.",
+          severity: "error",
+        })
+      );
     }
   };
 
@@ -147,17 +233,30 @@ const EditarCotizacion = () => {
   }
 
   if (isError) {
-    dispatch(showNotification({ message: "Error al cargar la cotización", severity: "error" }));
-    return (
-      <Typography color="error">Error al cargar la cotización.</Typography>
+    dispatch(
+      showNotification({
+        message: "Error al cargar la cotización",
+        severity: "error",
+      })
     );
+    /* return (
+      <Typography color="error">Error al cargar la cotización.</Typography>
+    ); */
   }
-
   return (
     <Box m={3}>
       <Typography variant="h4" gutterBottom>
         Editar Cotización
       </Typography>
+
+      <Button
+        variant="contained"
+        color="primary"
+        size="large"
+        onClick={() => setOpenAlert(true)}
+      >
+        Exportar Cotización
+      </Button>
 
       <Typography variant="h6" gutterBottom>
         Datos del Cliente
@@ -256,6 +355,65 @@ const EditarCotizacion = () => {
         onChange={handleInputChange}
         disabled
       />
+      <TextField
+        fullWidth
+        type="date"
+        label="Fecha de Creación"
+        name="fecha_creacion"
+        value={
+          formData.fecha_creacion
+            ? format(new Date(formData.fecha_creacion), "yyyy-MM-dd", {
+                locale: es,
+              })
+            : ""
+        }
+        onChange={handleInputChange}
+        disabled
+      />
+      <Typography variant="h6" gutterBottom>
+        Información de Pago
+      </Typography>
+
+      {formData.pagos.length > 0 ? (
+        formData.pagos.map((pago, index) => (
+          <Box key={index} mb={2} display="flex" gap={2}>
+            <TextField
+              fullWidth
+              label="Método de Pago"
+              value={pago.metodo?.nombre || "No especificado"}
+              disabled
+            />
+            <TextField
+              fullWidth
+              label="Estado del Pago"
+              value={pago.estado?.nombre || "No especificado"}
+              disabled
+            />
+            <TextField
+              fullWidth
+              label="Monto"
+              value={`$${pago.monto.toLocaleString()}`}
+              disabled
+            />
+            <TextField
+              fullWidth
+              label="Fecha de Pago"
+              value={
+                pago.fecha_pago
+                  ? format(new Date(pago.fecha_pago), "dd/MM/yyyy", {
+                      locale: es,
+                    })
+                  : "No disponible"
+              }
+              disabled
+            />
+          </Box>
+        ))
+      ) : (
+        <Typography color="textSecondary">
+          No hay información de pago asociada a esta transacción.
+        </Typography>
+      )}
       {/* Detalles de Productos */}
       <DetalleTransaccion
         detallesIniciales={formData.detalles}
@@ -304,6 +462,13 @@ const EditarCotizacion = () => {
           Cancelar
         </Button>
       </Box>
+      <AlertDialog
+        openAlert={openAlert}
+        onCloseAlert={() => setOpenAlert(false)}
+        onConfirm={handleExportPdf}
+        title="Confirmar Exportación"
+        message="¿Está seguro de que desea exportar la cotización en formato PDF?"
+      />
     </Box>
   );
 };

@@ -1,14 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
 import logoImage from "../../assets/images/logoLogin.png";
 import { useLoginMutation } from "../../services/authApi";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { showNotification } from "../../state/reducers/notificacionSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [credentials, setCredentials] = useState({ rut: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -17,14 +27,29 @@ const Login = () => {
     setCredentials({ ...credentials, [name]: value });
   };
 
+  // Alternar visibilidad de contraseña
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await login(credentials).unwrap();
-      navigate("/dashboard"); // Redirige al dashboard
+      dispatch(
+        showNotification({
+          message: "Inicio de sesión exitoso.",
+          severity: "success",
+        })
+      );
+      navigate("/dashboard");
     } catch (error) {
-      alert("Error al iniciar sesión");
-      console.error(error);
+      dispatch(
+        showNotification({
+          message: error?.data?.error || "Error al iniciar sesión.",
+          severity: "error",
+        })
+      );
     }
   };
 
@@ -68,25 +93,57 @@ const Login = () => {
           boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
         }}
       >
+        <Typography
+          variant="h5"
+          align="center"
+          fontWeight="bold"
+          sx={{ fontSize: "1.8rem" }}
+        >
+          Iniciar Sesión
+        </Typography>
         <TextField
-          label="Rut / Correo"
+          label="Rut"
           name="rut"
           value={credentials.rut}
           onChange={handleInputChange}
           fullWidth
+          InputLabelProps={{
+            style: { fontSize: "1.2rem" },
+          }}
+          InputProps={{ style: { fontSize: "1.2rem" } }}
         />
         <TextField
           label="Contraseña"
-          type="password"
+          type={showPassword ? "text" : "password"}
           name="password"
           value={credentials.password}
           onChange={handleInputChange}
           fullWidth
+          InputProps={{
+            style: { fontSize: "1.2rem" },
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={togglePasswordVisibility} edge="end">
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          InputLabelProps={{
+            style: { fontSize: "1.2rem" },
+          }}
         />
-        <Button variant="contained" onClick={handleLogin} fullWidth>
+        <Button
+          variant="contained"
+          onClick={handleLogin}
+          fullWidth
+          sx={{
+            fontSize: "1.2rem",
+            padding: "0.8rem",
+          }}
+        >
           {isLoading ? "Cargando..." : "Iniciar sesión"}
         </Button>
-        {/* {isError && <p>Error al cargar datos del usuario</p>} */}
       </Box>
     </Box>
   );
