@@ -154,6 +154,15 @@ export const ventasApi = createApi({
       invalidatesTags: ["Transaccion"], // Refresca las transacciones
     }),
 
+    // Eliminar chofer asignado
+    eliminarAsignadoTransaccion: builder.mutation({
+      query: (id_transaccion) => ({
+        url: `/transacciones/${id_transaccion}/desasignar`,
+        method: "PATCH"
+      }),
+      invalidatesTags: ["Transaccion"],
+    }),
+
     // Eliminar transacciones
     deleteTransacciones: builder.mutation({
       query: ({ ids }) => ({
@@ -204,6 +213,7 @@ export const {
   useDeleteDetalleMutation,
   useDeleteTransaccionesMutation,
   useAsignarTransaccionMutation,
+  useEliminarAsignadoTransaccionMutation,
 } = ventasApi;
 
 export default ventasApi;

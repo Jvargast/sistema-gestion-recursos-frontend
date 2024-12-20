@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, IconButton, useTheme } from "@mui/material";
-import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined";
 import EditIcon from "@mui/icons-material/Edit";
 import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
@@ -9,7 +8,6 @@ import {
   useCreateTransaccionMutation,
   useDeleteTransaccionesMutation,
   useGetAllTransaccionesQuery,
-  useAsignarTransaccionMutation,
 } from "../../../services/ventasApi";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -22,8 +20,6 @@ import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
 import LoaderComponent from "../../../components/common/LoaderComponent";
 import ModalForm from "../../../components/common/ModalForm";
 import AlertDialog from "../../../components/common/AlertDialog";
-import AssignModal from "../../../components/common/AssignModal";
-import { useGetAllChoferesQuery } from "../../../services/usuariosApi";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
 
 const Pedidos = () => {
@@ -50,18 +46,13 @@ const Pedidos = () => {
     { isLoading: isCreating, isSuccess, error: errorCreate },
   ] = useCreateTransaccionMutation();
 
-  const [asignarTransaccion, { isLoading: isAssigning }] =
-    useAsignarTransaccionMutation();
+  
   // Estados para eliminar
   const [openAlert, setOpenAlert] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteTransacciones, { isLoading: isDeleting }] =
     useDeleteTransaccionesMutation();
 
-  // Modal Asignar
-  const [openAssignModal, setOpenAssignModal] = useState(false);
-  const [selectedTransaccion, setSelectedTransaccion] = useState(null);
-  const [selectedChofer, setSelectedChofer] = useState("");
 
   useEffect(() => {
     // Detecta si hay un estado de refetch
@@ -76,15 +67,12 @@ const Pedidos = () => {
     useGetAllClientesQuery();
   const { data: metodosPago, isLoading: isLoadingMetodosPago } =
     useGetMetodosDePagoQuery();
-  const { data: choferesData, isLoading: isLoadingChoferes } =
-    useGetAllChoferesQuery();
 
   const isLoadingAll =
     isLoading ||
     isLoadingProductos ||
     isLoadingClientes ||
-    isLoadingMetodosPago ||
-    isLoadingChoferes;
+    isLoadingMetodosPago;
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
@@ -151,8 +139,8 @@ const Pedidos = () => {
       resizable: false,
     },
     {
-      field: "acciones",
-      headerName: "Acciones",
+      field: "editar",
+      headerName: "Editar",
       flex: 0.4,
       resizable: false,
       sortable: false,
@@ -172,18 +160,6 @@ const Pedidos = () => {
             }}
           >
             <EditIcon />
-          </IconButton>
-          <IconButton
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleOpenAssignModal(params.row);
-            }}
-            disabled={isAssigning}
-          >
-            <PersonAddAlt1OutlinedIcon />
           </IconButton>
         </Box>
       ),
@@ -256,40 +232,8 @@ const Pedidos = () => {
     // Aquí puedes implementar lógica adicional, como abrir un modal para editar la cotización
   };
 
-  const handleOpenAssignModal = (transaccion) => {
-    setSelectedTransaccion(transaccion);
-    setOpenAssignModal(true);
-  };
 
-  const handleAssign = async (chofer) => {
-    try {
-      if (!chofer || !selectedTransaccion) return;
-
-      // Llama al hook de RTK Query para asignar la transacción
-      await asignarTransaccion({
-        id_transaccion: selectedTransaccion.id,
-        id_usuario: chofer.rut,
-      }).unwrap();
-
-      dispatch(
-        showNotification({
-          message: "Pedido asignado con éxito.",
-          severity: "success",
-        })
-      );
-
-      setOpenAssignModal(false);
-      refetch(); // Actualizar la lista de transacciones
-    } catch (error) {
-      console.log(error)
-      dispatch(
-        showNotification({
-          message: `Error al asignar chofer. ${error.data?.error}`,
-          severity: "error",
-        })
-      );
-    }
-  };
+  
 
   // Función para abrir la alerta de confirmación
   const handleOpenDelete = () => {
@@ -426,12 +370,7 @@ const Pedidos = () => {
         title="Confirmar Eliminación"
         message={`¿Está seguro de que desea eliminar las ${selectedRows.length} transacciones seleccionadas?`}
       />
-      <AssignModal
-        open={openAssignModal}
-        onClose={() => setOpenAssignModal(false)}
-        onSubmit={handleAssign}
-        choferes={choferesData || []}
-      />
+      
     </Box>
   );
 };
