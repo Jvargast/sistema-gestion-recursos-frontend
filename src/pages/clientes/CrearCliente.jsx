@@ -39,7 +39,7 @@ const CrearCliente = () => {
 
   // Cargar el script de Google Maps
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyAfC5j5PNCgk1cua_T-0BUE44bk74Fg7Yc", // Sustituye con tu clave de API de Google Maps
+    googleMapsApiKey: "", // Sustituye con tu clave de API de Google Maps
     libraries,
   });
 
