@@ -8,6 +8,7 @@ export const facturasApi = createApi({
       (process.env.REACT_APP_BASE_URL
         ? process.env.REACT_APP_BASE_URL
         : API_URL) + "/facturas",
+    credentials: "include",
   }),
   tagTypes: ["Facturas"],
   endpoints: (builder) => ({
@@ -18,6 +19,10 @@ export const facturasApi = createApi({
         return `/?${queryParams}`;
       },
       providesTags: ["Facturas"],
+      transformResponse: (response) => ({
+        facturas: response.data,
+        paginacion: response.total,
+      }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -81,6 +86,23 @@ export const facturasApi = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: "Facturas", id }],
     }),
+
+    // Borrar Facturas
+    deleteFacturas: builder.mutation({
+      query: ({ ids }) => ({
+        url: `/`,
+        method: "PATCH",
+        body: { ids },
+      }),
+      invalidatesTags: ["Facturas"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("Error al borrar pagos: ", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -92,5 +114,5 @@ export const {
   useActualizarEstadoFacturaMutation,
   useActualizarFacturaMutation,
   useEliminarFacturaMutation,
-  
+  useDeleteFacturasMutation,
 } = facturasApi;

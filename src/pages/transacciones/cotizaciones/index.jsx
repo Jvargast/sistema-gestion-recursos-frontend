@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, IconButton, useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { DataGrid } from "@mui/x-data-grid";
@@ -21,6 +21,7 @@ import LoaderComponent from "../../../components/common/LoaderComponent";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
 import AlertDialog from "../../../components/common/AlertDialog";
+import { CustomPagination } from "../../../components/common/CustomPagination";
 
 const Cotizaciones = () => {
   const theme = useTheme();
@@ -29,14 +30,16 @@ const Cotizaciones = () => {
   const location = useLocation();
   // values to be sent to the backend
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [sort, setSort] = useState({});
+  const [pageSize, setPageSize] = useState(10);
+  //const [sort, setSort] = useState({});
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const { data, isLoading, error, refetch } = useGetAllTransaccionesQuery({
     tipo_transaccion: "cotizacion",
     search,
+    page: page + 1,
+    limit: pageSize
   });
 
   // Estados para eliminar
@@ -55,18 +58,25 @@ const Cotizaciones = () => {
     useGetAllProductosQuery({ search: searchTerm });
   const [
     createCotizacion,
-    { isLoading: loadinCreate, isError, isSuccess, error: errorCreate },
+    { isLoading: isCreating, isError },
   ] = useCreateTransaccionMutation();
-  const { data: clientes, isLoadingClients } = useGetAllClientesQuery();
-  const { data: metodosPago, isLoading: loadingMetodosPago } =
+  const { data: clientes, isLoadingClientes } = useGetAllClientesQuery();
+  const { data: metodosPago, isLoading: isLoadingMetodosPago } =
     useGetMetodosDePagoQuery();
+
+
+  const isLoadingAll =
+    isLoading ||
+    isLoadingProductos ||
+    isLoadingClientes ||
+    isLoadingMetodosPago;
+
   const [selectedRows, setSelectedRows] = useState([]);
   // Modal agregar cotizaciones
   const [open, setOpen] = useState(false);
-
+  const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   // Mapear filas para la tabla
-  const rows = data
-    ? data.map((row) => ({
+  const rows = data?.transacciones ? data?.transacciones.map((row) => ({
         ...row,
 
         clienteNombre: row.cliente?.nombre || "Sin cliente",
@@ -78,7 +88,7 @@ const Cotizaciones = () => {
 
   const columns = [
     {
-      field: "id_transaccion",
+      field: "sequentialId",
       headerName: "ID",
       flex: 0.25,
       resizable: false,
@@ -104,10 +114,10 @@ const Cotizaciones = () => {
     {
       field: "fecha_creacion",
       headerName: "Fecha Creación",
-      flex: 0.6,
+      flex: 0.5,
       resizable: false,
       renderCell: (params) => {
-        return format(new Date(params.value), "dd 'de' MMMM 'de' yyyy, HH:mm", {
+        return format(new Date(params.value), "dd-MM-yyyy", {
           locale: es,
         });
       },
@@ -161,8 +171,8 @@ const Cotizaciones = () => {
       label: "Nombre del Cliente",
       type: "select",
       searchable: true, // Habilita react-select
-      options: Array.isArray(clientes)
-        ? clientes.map((cliente) => ({
+      options: Array.isArray(clientes?.clientes)
+        ? clientes?.clientes.map((cliente) => ({
             value: cliente.rut,
             label: cliente.nombre,
           }))
@@ -265,7 +275,9 @@ const Cotizaciones = () => {
    * Eliminar varias cotizaciones logicamente
    */
 
-  if (isLoading) {
+  const rowsPerPageOptions = [5, 10, 25, 50];
+  
+  if (isLoadingAll) {
     return <LoaderComponent />;
   }
 
@@ -310,6 +322,7 @@ const Cotizaciones = () => {
         <CustomNewButton
           name={"Nueva Cotización"}
           onClick={() => setOpen(true)}
+          disabled={isCreating}
         />
         <Button
           color="error"
@@ -320,25 +333,33 @@ const Cotizaciones = () => {
           Eliminar Seleccionados
         </Button>
         <DataGrid
-          loading={isLoading || !data}
-          getRowId={(row) => row.id_transaccion}
+          loading={isLoading || !data?.transacciones}
+          getRowId={(row) => row.sequentialId}
           rows={rows}
           columns={columns}
-          rowCount={(data && data.total) || 0}
-          rowsPerPageOptions={[20, 50, 100]}
+          /* rowCount={paginacion?.totalItems || 0} */
+          paginationMode="server" 
+          rowCount={paginacion?.totalItems || rows.length}
+          paginationModel={{
+            pageSize: pageSize,
+            page: page,
+          }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page);
+            setPageSize(model.pageSize);
+          }}
           pagination
           checkboxSelection
           onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
-          page={page}
-          pageSize={pageSize}
-          paginationMode="server"
-          sortingMode="client"
-          sx={{ color: "black", fontWeight: 400, fontSize: "1rem" }}
-          onPageChange={(newPage) => setPage(newPage)}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-          onSortModelChange={(newSortModel) => setSort(...newSortModel)}
+          pageSizeOptions={rowsPerPageOptions}
+          sx={{
+            color: "black",
+            fontWeight: 400,
+            fontSize: "1rem",
+          }}
           slots={{
             toolbar: DataGridCustomToolbar,
+            pagination: CustomPagination,
           }}
           slotProps={{
             toolbar: { searchInput, setSearchInput, setSearch },

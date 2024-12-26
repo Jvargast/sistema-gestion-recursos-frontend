@@ -24,11 +24,19 @@ import Pagos from "./pages/pagos";
 import Administracion from "./pages/administracion";
 import EditarFactura from "./pages/facturas/EditarFactura";
 import { logout, setUser } from "./state/reducers/authSlice";
-import Cookies from "js-cookie";
 import { API_URL } from "./services/apiBase";
 import CrearCliente from "./pages/clientes/CrearCliente";
 import EditarCotizacion from "./pages/transacciones/cotizaciones/EditarCotizacion";
 import EditarPedido from "./pages/transacciones/pedidos/EditarPedido";
+import EditarVenta from "./pages/transacciones/ventas/EditarVenta";
+import EditarPago from "./pages/pagos/EditarPago";
+import VerCliente from "./pages/clientes/VerCliente";
+import EditarCliente from "./pages/clientes/EditarCliente";
+import Seguridad from "./pages/administracion/seguridad";
+import RoleManagement from "./pages/administracion/Roles/RoleManagement";
+import EditRole from "./pages/administracion/Roles/EditRoleManagement";
+import UserManagement from "./pages/administracion/usuarios";
+
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
@@ -94,16 +102,24 @@ function App() {
               { path: "facturas", element: <Facturas /> },
               { path: "facturas/editar/:id", element: <EditarFactura /> },
               { path: "pagos", element: <Pagos /> },
+              { path: "pagos/editar/:id", element: <EditarPago /> },
               { path: "cotizaciones", element: <Cotizaciones /> },
               { path: "cotizaciones/editar/:id", element: <EditarCotizacion /> },
               { path: "pedidos", element: <Pedidos /> },
               { path: "pedidos/editar/:id", element: <EditarPedido /> },
               { path: "ventas", element: <Ventas /> },
+              { path: "ventas/editar/:id", element: <EditarVenta/>},
               { path: "clientes", element: <Clientes /> },
               { path: "clientes/crear", element: <CrearCliente /> },
+              { path: "clientes/ver/:id", element: <VerCliente/> },
+              { path: "clientes/editar/:id", element: <EditarCliente/> },
               { path: "productos", element: <Productos /> },
               { path: "insumos", element: <Insumos /> },
+              { path: "usuarios", element: <UserManagement /> },
               { path: "admin", element: <Administracion /> },
+              { path: "roles", element: <RoleManagement /> },
+              { path: "roles/editar/:id", element: <EditRole /> },
+              { path: "seguridad", element: <Seguridad /> },
               // Agrega otras rutas aquí...
             ],
           },

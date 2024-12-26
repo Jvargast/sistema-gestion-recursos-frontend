@@ -16,7 +16,6 @@ const DataGridCustomToolbar = ({ searchInput, setSearchInput, setSearch }) => {
         <FlexBetween>
           <GridToolbarColumnsButton />
           <GridToolbarDensitySelector />
-          <GridToolbarExport />
         </FlexBetween>
 
         {/* Barra de búsqueda */}

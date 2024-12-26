@@ -20,12 +20,12 @@ import {
 } from "../../../services/ventasApi";
 import { useGetAllEstadosQuery } from "../../../services/estadoTransaccionApi";
 import LoaderComponent from "../../../components/common/LoaderComponent";
-import DetalleTransaccion from "./DetalleTransaccion";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
 import { API_URL } from "../../../services/apiBase";
 import AlertDialog from "../../../components/common/AlertDialog";
+import DetallesTransaccion from "../../../components/venta/DetallesTransaccion";
 
 const EditarCotizacion = () => {
   const { id } = useParams();
@@ -415,7 +415,7 @@ const EditarCotizacion = () => {
         </Typography>
       )}
       {/* Detalles de Productos */}
-      <DetalleTransaccion
+      <DetallesTransaccion
         detallesIniciales={formData.detalles}
         productos={productos || []}
         onDetallesChange={(updatedDetalles) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, IconButton, useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { DataGrid } from "@mui/x-data-grid";
@@ -29,8 +29,8 @@ const Pedidos = () => {
   const location = useLocation();
   // values to be sent to the backend
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [sort, setSort] = useState({});
+  const [pageSize, setPageSize] = useState(10);
+  //const [sort, setSort] = useState({});
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,11 +39,13 @@ const Pedidos = () => {
     useGetAllTransaccionesQuery({
       tipo_transaccion: "pedido",
       search,
+      page: page + 1,
+      limit: pageSize
     });
 
   const [
     createPedido,
-    { isLoading: isCreating, isSuccess, error: errorCreate },
+    { isLoading: isCreating },
   ] = useCreateTransaccionMutation();
 
   
@@ -76,11 +78,10 @@ const Pedidos = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
+  const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   // Mapear filas para la tabla
-  const rows = data
-    ? data.map((row) => ({
+  const rows = data?.transacciones ? data?.transacciones.map((row) => ({
         ...row,
-
         clienteNombre: row.cliente?.nombre || "Sin cliente",
         usuarioNombre: row.usuario?.nombre || "Sin usuario",
         estadoNombre: row.estado?.nombre_estado || "Sin estado",
@@ -90,7 +91,7 @@ const Pedidos = () => {
 
   const columns = [
     {
-      field: "id_transaccion",
+      field: "sequentialId",
       headerName: "ID",
       flex: 0.25,
       resizable: false,
@@ -116,10 +117,10 @@ const Pedidos = () => {
     {
       field: "fecha_creacion",
       headerName: "Fecha Creación",
-      flex: 0.6,
+      flex: 0.5,
       resizable: false,
       renderCell: (params) => {
-        return format(new Date(params.value), "dd 'de' MMMM 'de' yyyy, HH:mm", {
+        return format(new Date(params.value), "dd-MM-yyyy", {
           locale: es,
         });
       },
@@ -172,8 +173,8 @@ const Pedidos = () => {
       label: "Nombre del Cliente",
       type: "select",
       searchable: true, // Habilita react-select
-      options: Array.isArray(clientes)
-        ? clientes.map((cliente) => ({
+      options: Array.isArray(clientes?.clientes)
+        ? clientes?.clientes.map((cliente) => ({
             value: cliente.rut,
             label: cliente.nombre,
           }))
@@ -228,7 +229,7 @@ const Pedidos = () => {
 
   // Función para manejar la acción de editar
   const handleEdit = (row) => {
-    navigate(`/pedidos/editar/${row.id_transaccion}`);
+    navigate(`/pedidos/editar/${row.id_transaccion}`, { state: { refetch: true } });
     // Aquí puedes implementar lógica adicional, como abrir un modal para editar la cotización
   };
 
@@ -274,6 +275,8 @@ const Pedidos = () => {
     }
   };
 
+  const rowsPerPageOptions = [5, 10, 25, 50];
+
   if (isLoadingAll) return <LoaderComponent />;
 
   if (isError) {
@@ -312,9 +315,6 @@ const Pedidos = () => {
             color: theme.palette.secondary[100],
             borderTop: "none",
           },
-          /* "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[200]} !important`,
-          }, */
         }}
       >
         <CustomNewButton
@@ -331,23 +331,27 @@ const Pedidos = () => {
           {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
         </Button>
         <DataGrid
-          loading={isLoading || !data}
-          getRowId={(row) => row.id_transaccion}
+          loading={isLoading || !data?.transacciones}
+          getRowId={(row) => row.sequentialId}
           rows={rows}
           columns={columns}
-          rowCount={(data && data.total) || 0}
-          rowsPerPageOptions={[20, 50, 100]}
+          rowCount={paginacion?.totalItems || rows.length}
+          paginationModel={{
+            pageSize: pageSize,
+            page: page,
+          }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page);
+            setPageSize(model.pageSize);
+          }}
           pagination
+          pageSizeOptions={rowsPerPageOptions}
           checkboxSelection
           onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
-          page={page}
-          pageSize={pageSize}
           paginationMode="server"
           sortingMode="client"
           sx={{ color: "black", fontWeight: 400, fontSize: "1rem" }}
-          onPageChange={(newPage) => setPage(newPage)}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-          onSortModelChange={(newSortModel) => setSort(...newSortModel)}
+          /* onSortModelChange={(newSortModel) => setSort(...newSortModel)} */
           slots={{
             toolbar: DataGridCustomToolbar,
           }}

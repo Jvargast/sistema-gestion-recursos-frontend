@@ -18,9 +18,14 @@ export const ventasApi = createApi({
         params,
       }),
       providesTags: ["Transaccion"],
+      transformResponse: (response) => ({
+        transacciones: response.data, // El array de transacciones
+        paginacion: response.total,   // Datos de paginación
+      }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
+          
         } catch (error) {
           console.error("Error al obtener cotizaciones:", error);
         }
@@ -129,7 +134,7 @@ export const ventasApi = createApi({
     // Completar transacción
     finalizarTransaccion: builder.mutation({
       query: ({ id, updates }) => ({
-        url: `/transacciones/${id}/finalizarTransaccion`,
+        url: `/transacciones/${id}/finalizarTransaction`,
         method: "PUT",
         body: updates,
       }),
@@ -144,6 +149,15 @@ export const ventasApi = createApi({
       },
     }),
 
+    // Cambiar método de pago
+    changeMetodoPago: builder.mutation({
+      query: ({ id, metodo_pago }) => ({
+        url: `/transacciones/${id}/changeMetodoPago`,
+        method: "PUT",
+        body: { metodo_pago },
+      }),
+      invalidatesTags: ["Transaccion"],
+    }),
     // Asignar una transacción a un chofer/usuario
     asignarTransaccion: builder.mutation({
       query: ({ id_transaccion, id_usuario }) => ({
@@ -158,7 +172,7 @@ export const ventasApi = createApi({
     eliminarAsignadoTransaccion: builder.mutation({
       query: (id_transaccion) => ({
         url: `/transacciones/${id_transaccion}/desasignar`,
-        method: "PATCH"
+        method: "PATCH",
       }),
       invalidatesTags: ["Transaccion"],
     }),
@@ -166,7 +180,7 @@ export const ventasApi = createApi({
     // Eliminar transacciones
     deleteTransacciones: builder.mutation({
       query: ({ ids }) => ({
-        url: `/transacciones/`, 
+        url: `/transacciones/`,
         method: "PATCH",
         body: { ids }, // Enviamos el array de IDs en el body
       }),
@@ -174,7 +188,6 @@ export const ventasApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-
         } catch (error) {
           console.error("Error al eliminar transacciones:", error);
         }
@@ -191,7 +204,6 @@ export const ventasApi = createApi({
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          console.log("Detalle eliminado correctamente");
         } catch (error) {
           console.error("Error al eliminar detalle:", error);
         }
@@ -214,6 +226,7 @@ export const {
   useDeleteTransaccionesMutation,
   useAsignarTransaccionMutation,
   useEliminarAsignadoTransaccionMutation,
+  useChangeMetodoPagoMutation,
 } = ventasApi;
 
 export default ventasApi;

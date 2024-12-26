@@ -12,10 +12,10 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactSelect from "react-select";
 import { useNavigate } from "react-router-dom";
-import ProductDetails from "../../pages/transacciones/cotizaciones/ProductDetails";
+import ProductDetails from "../venta/ProductDetails";
 
 const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
   const navigate = useNavigate();
@@ -25,6 +25,15 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
       {}
     )
   );
+  // Sincroniza `formData` cuando `fields` cambian
+  useEffect(() => {
+    setFormData(
+      fields.reduce(
+        (acc, field) => ({ ...acc, [field.name]: field.defaultValue || "" }),
+        {}
+      )
+    );
+  }, [fields]);
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -48,7 +57,13 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    const processedFormData = { ...formData };
+
+    // Convertir monto a número
+    if (processedFormData.monto) {
+      processedFormData.monto = parseFloat(processedFormData.monto);
+    }
+    onSubmit(processedFormData);
     onClose();
   };
 
@@ -70,6 +85,7 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
           }
           switch (field.type) {
             case "text":
+            case "number":
               return (
                 <TextField
                   key={field.name}
@@ -77,8 +93,10 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
                   margin="dense"
                   label={field.label}
                   name={field.name}
+                  type={field.type}
                   value={formData[field.name]}
                   onChange={handleChange}
+                  disabled={field.disabled}
                 />
               );
             case "select":
@@ -127,7 +145,10 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
                       onChange={handleChange}
                     >
                       {field.options.map((option, index) => (
-                        <MenuItem key={option.value || index} value={option.value}>
+                        <MenuItem
+                          key={option.value || index}
+                          value={option.value}
+                        >
                           {option.label}
                         </MenuItem>
                       ))}

@@ -1,31 +1,53 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import {
-  Box,
-  Button,
-  IconButton,
-  Typography,
-  useTheme,
-  Paper,
-} from "@mui/material";
+import { Box, Button, IconButton, useTheme, Paper } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { useGetAllFacturasQuery } from "../../services/facturasApi";
+import {
+  useDeleteFacturasMutation,
+  useGetAllFacturasQuery,
+} from "../../services/facturasApi";
 import Header from "../../components/common/Header";
 import { useNavigate } from "react-router-dom";
+import DataGridCustomToolbar from "../../components/common/DataGridCustomToolbar";
+import { CustomPagination } from "../../components/common/CustomPagination";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../state/reducers/notificacionSlice";
+import LoaderComponent from "../../components/common/LoaderComponent";
+import AlertDialog from "../../components/common/AlertDialog";
 
 const Facturas = () => {
   const theme = useTheme();
-  const { data: facturas, isLoading } = useGetAllFacturasQuery({estado: "Cancelada"});
+  const dispatch = useDispatch();
+
+  const [openAlert, setOpenAlert] = useState(false);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+
+  const [deleteFacturas, { isLoading: isDeleting }] =
+    useDeleteFacturasMutation();
+
+  const {
+    data: facturas,
+    isLoading,
+    refetch,
+  } = useGetAllFacturasQuery({
+    estado: "Cancelada",
+    page: page + 1,
+    limit: pageSize,
+  });
   const [selectedRows, setSelectedRows] = useState([]);
   const navigate = useNavigate();
+  const paginacion = useMemo(
+    () => facturas?.paginacion || {},
+    [facturas?.paginacion]
+  );
 
   // Transformar las facturas para DataGrid
-  const rows = facturas
-    ? facturas.map((factura) => ({
+  const rows = facturas?.facturas
+    ? facturas?.facturas?.map((factura) => ({
         id: factura.id_factura,
         numero: factura.numero_factura,
         clienteNombre: factura.transaccion?.cliente?.nombre,
@@ -33,6 +55,7 @@ const Facturas = () => {
         fecha: factura.fecha_emision,
         total: factura.total,
         estadoNombre: factura.estado?.nombre,
+        sequentialId: factura.sequentialId,
       }))
     : [];
 
@@ -46,19 +69,20 @@ const Facturas = () => {
       flex: 0.4,
       resizable: false,
     },
-    { field: "observaciones", headerName: "Observaciones", flex: 0.5, resizable: false },
+    {
+      field: "observaciones",
+      headerName: "Observaciones",
+      flex: 0.5,
+      resizable: false,
+    },
     {
       field: "fecha",
       headerName: "Fecha Emisión",
       flex: 0.6,
       renderCell: (params) => {
-        return format(
-          new Date(params.value),
-          "dd 'de' MMMM 'de' yyyy, HH:mm",
-          {
-            locale: es,
-          }
-        );
+        return format(new Date(params.value), "dd 'de' MMMM 'de' yyyy, HH:mm", {
+          locale: es,
+        });
       },
       resizable: false,
     },
@@ -94,25 +118,55 @@ const Facturas = () => {
           >
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleDelete(params.row);
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
         </Box>
       ),
     },
   ];
 
-  // Función para manejar eliminación
-  const handleDelete = (row) => {
-    console.log("Eliminar factura:", row);
-    // Lógica para eliminar factura
+  // Función para eliminar transacciones
+  const handleBulkDelete = async () => {
+    try {
+      await deleteFacturas({ ids: selectedRows }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Ventas eliminadss correctamente.",
+          severity: "success",
+        })
+      );
+      setSelectedRows([]);
+      refetch();
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al eliminar Pedidos: ${error.error}`,
+          severity: "error",
+        })
+      );
+    }
   };
+
+  const rowsPerPageOptions = [5, 10, 25, 50];
+
+  const handlePageChange = (paginationModel) => {
+    setPage(paginationModel.page);
+    setPageSize(paginationModel.pageSize);
+  };
+
+  const handleOpenDelete = () => {
+    if (selectedRows.length > 0) {
+      setOpenAlert(true);
+    } else {
+      dispatch(
+        showNotification({
+          message: "Debe seleccionar al menos una factura.",
+          severity: "warning",
+        })
+      );
+    }
+  };
+
+  if (isLoading) return <LoaderComponent />;
+
   return (
     <Box
       sx={{
@@ -173,11 +227,26 @@ const Facturas = () => {
             }, */
           }}
         >
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleOpenDelete}
+            disabled={selectedRows.length === 0 || isDeleting}
+          >
+            {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+          </Button>
           <DataGrid
             rows={rows}
+            getRowId={(row) => row.sequentialId}
+            rowCount={paginacion?.totalItems || rows.length}
             columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[10, 20, 50]}
+            paginationMode="server"
+            paginationModel={{
+              pageSize: pageSize,
+              page: page,
+            }}
+            onPaginationModelChange={handlePageChange}
+            pageSizeOptions={rowsPerPageOptions}
             loading={isLoading}
             checkboxSelection
             disableSelectionOnClick
@@ -193,9 +262,20 @@ const Facturas = () => {
               },
               fontWeight: 400,
             }}
+            slots={{
+              toolbar: DataGridCustomToolbar,
+              pagination: CustomPagination,
+            }}
           />
         </Box>
       </Paper>
+      <AlertDialog
+        openAlert={openAlert}
+        onCloseAlert={() => setOpenAlert(false)}
+        onConfirm={handleBulkDelete}
+        title="Confirmar Eliminación"
+        message={`¿Está seguro de que desea eliminar las ${selectedRows.length} facturas seleccionadas?`}
+      />
     </Box>
   );
 };

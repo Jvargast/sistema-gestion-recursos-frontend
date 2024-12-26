@@ -13,7 +13,6 @@ import {
   FormControl,
   Grid2,
   IconButton,
-  Grid,
   Divider,
 } from "@mui/material";
 import {
@@ -24,6 +23,8 @@ import {
   useAsignarTransaccionMutation,
   useEliminarAsignadoTransaccionMutation,
   useChangeMetodoPagoMutation,
+  useCompleteTransactionMutation,
+  useFinalizarTransaccionMutation,
 } from "../../../services/ventasApi";
 import { useGetAllEstadosQuery } from "../../../services/estadoTransaccionApi";
 import { useGetAllChoferesQuery } from "../../../services/usuariosApi";
@@ -37,8 +38,10 @@ import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined
 import AlertDialog from "../../../components/common/AlertDialog";
 import InfoFieldGroup from "../../../components/common/InfoFieldGroup";
 import DetallesTransaccion from "../../../components/venta/DetallesTransaccion";
+import { useRegistrarMetodoDePagoMutation } from "../../../services/pagosApi";
+import ModalForm from "../../../components/common/ModalForm";
 
-const EditarPedido = () => {
+const EditarVenta = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -61,7 +64,7 @@ const EditarPedido = () => {
   // Obtener estados desde el backend
   const { data: estadosData, isLoading: isLoadingEstados } =
     useGetAllEstadosQuery({
-      tipo_transaccion: "pedido",
+      tipo_transaccion: "venta",
     });
 
   // Estado para el formulario
@@ -91,6 +94,12 @@ const EditarPedido = () => {
     useEliminarAsignadoTransaccionMutation();
   const [changeMetodoPago, { isLoading: isChangingMetodo }] =
     useChangeMetodoPagoMutation();
+  const [completeTransaction, { isLoading: isCompleting }] =
+    useCompleteTransactionMutation();
+  const [finalizarTransaccion, { isLoading: isFinalizing }] =
+    useFinalizarTransaccionMutation();
+  const [registrarMetodoPago, { isLoading: isRegisteringPago }] =
+    useRegistrarMetodoDePagoMutation();
 
   const isLoading =
     isLoadingTransaccion ||
@@ -104,11 +113,21 @@ const EditarPedido = () => {
   // Modal Asignar
   const [openAssignModal, setOpenAssignModal] = useState(false);
   const [selectedTransaccion, setSelectedTransaccion] = useState(null);
- 
+
+  //Seleccionar método de pago
+  const [selectedMetodoPago, setSelectedMetodoPago] = useState("");
 
   // Modal para eliminar
   const [openAlert, setOpenAlert] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [/* deleteLoading */, setDeleteLoading] = useState(false);
+
+  // Modal para completar pago
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+  const [paymentData, setPaymentData] = useState({
+    metodo_pago: "",
+    monto: "",
+    referencia: "",
+  });
 
   const detallesInicializados = useMemo(() => {
     if (!transaccionData?.detalles) return [];
@@ -141,10 +160,20 @@ const EditarPedido = () => {
     }
   }, [transaccionData, detallesInicializados]);
 
+  // Al inicializar los datos de la transacción
+  useEffect(() => {
+    if (formData.pagos.length > 0) {
+      setPaymentData((prev) => ({
+        ...prev,
+        metodo_pago: formData.pagos[0]?.metodo?.nombre || "No especificado",
+      }));
+    }
+  }, [formData.pagos]);
+
   useEffect(() => {
     if (location.state?.refetch) {
       refetch();
-      navigate(`/pedidos/editar/${id}`, { replace: true }); // Limpia el estado
+      navigate(`/ventas/editar/${id}`, { replace: true }); // Limpia el estado
     } else {
       refetch(); // Siempre refresca al cargar
     }
@@ -172,7 +201,7 @@ const EditarPedido = () => {
               severity: "success",
             })
           );
-          navigate("/pedidos", { state: { refetch: true } });
+          navigate("/ventas", { state: { refetch: true } });
           break;
         case "changeTipo":
           await changeTipo({
@@ -185,7 +214,7 @@ const EditarPedido = () => {
               severity: "success",
             })
           );
-          navigate("/pedidos", { state: { refetch: true } });
+          navigate("/ventas", { state: { refetch: true } });
           break;
         case "actualizarDetalles":
           const detallesPreparados = formData.detalles.map((detalle) => {
@@ -209,7 +238,7 @@ const EditarPedido = () => {
                 severity: "success",
               })
             );
-            navigate("/pedidos", { state: { refetch: true } }); // Redireccionar al listado
+            navigate("/ventas", { state: { refetch: true } }); // Redireccionar al listado
           } catch (error) {
             dispatch(
               showNotification({
@@ -241,7 +270,7 @@ const EditarPedido = () => {
   if (isError) {
     dispatch(
       showNotification({
-        message: "Error al cargar el pedido",
+        message: "Error al cargar la venta",
         severity: "error",
       })
     );
@@ -280,6 +309,14 @@ const EditarPedido = () => {
         })
       );
     }
+  };
+
+  const handleOpenPaymentModal = () => {
+    setOpenPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setOpenPaymentModal(false);
   };
 
   const handleOpenDelete = () => {
@@ -334,7 +371,6 @@ const EditarPedido = () => {
       }
 
       // Llamar al endpoint con el ID de la transacción y el método de pago
-      console.log(nuevoMetodoPago)
       await changeMetodoPago({
         id,
         metodo_pago: nuevoMetodoPago,
@@ -351,7 +387,6 @@ const EditarPedido = () => {
       // Refrescar los datos de la transacción
       refetch();
     } catch (error) {
-      console.log(error)
       // Manejar errores y mostrar notificación
       dispatch(
         showNotification({
@@ -364,11 +399,126 @@ const EditarPedido = () => {
     }
   };
 
+  const handleMetodoPagoChange = (e) => {
+    setSelectedMetodoPago(e.target.value);
+  };
+
+  const handleRegistrarMetodoPago = async () => {
+    if (!selectedMetodoPago) {
+      dispatch(
+        showNotification({
+          message: "Por favor, selecciona un método de pago.",
+          severity: "error",
+        })
+      );
+      return;
+    }
+
+    try {
+      await registrarMetodoPago({
+        id,
+        metodo_pago: selectedMetodoPago,
+      }).unwrap();
+
+      dispatch(
+        showNotification({
+          message: "Método de pago registrado exitosamente.",
+          severity: "success",
+        })
+      );
+      refetch(); // Refresca los datos de la transacción
+      setSelectedMetodoPago(""); // Reinicia el estado del método de pago seleccionado
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al registrar el método de pago: ${
+            error?.data?.error || "Desconocido"
+          }`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleComplete = async (data) => {
+    try {
+      await completeTransaction({
+        id,
+        updates: {
+          metodo_pago: data.metodo_pago,
+          monto: Number(data.monto),
+          referencia: data.referencia,
+        },
+      }).unwrap();
+
+      dispatch(
+        showNotification({
+          message: "Transacción completada exitosamente.",
+          severity: "success",
+        })
+      );
+
+      setOpenPaymentModal(false);
+      refetch(); // Actualizar datos
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al completar transacción: ${
+            error?.data?.error || "Desconocido"
+          }`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  const handleFinalizar = async () => {
+    try {
+      await finalizarTransaccion({
+        id,
+      }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Transacción finalizada exitosamente.",
+          severity: "success",
+        })
+      );
+      refetch(); // Actualizar datos de la transacción
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al finalizar transacción: ${
+            error?.data?.error || "Desconocido"
+          }`,
+          severity: "error",
+        })
+      );
+    }
+  };
+
   return (
     <Box m={1.5}>
       <Typography variant="h4" gutterBottom fontWeight="bold" mb={3}>
-        Editar Pedido
+        Editar Venta
       </Typography>
+      <Box display="flex" justifyContent="center" gap={2} mb={3}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenPaymentModal}
+          disabled={isCompleting}
+        >
+          {isCompleting ? "Completando..." : "Completar Transacción"}
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleFinalizar}
+          disabled={isFinalizing}
+        >
+          {isFinalizing ? "Finalizando..." : "Finalizar Transacción"}
+        </Button>
+      </Box>
       <Box>
         <Grid2 container spacing={3} display="flex" justifyContent="center">
           <Grid2 xs={12} sm={6} md={4} width={"30%"}>
@@ -427,7 +577,7 @@ const EditarPedido = () => {
           {/* Información del Estado */}
           <Grid2 xs={12} sm={6} md={4} width={"20%"}>
             <Typography variant="h5" fontWeight="bold" mb={1}>
-              Estado Pedido
+              Estado Venta
             </Typography>
             <FormControl fullWidth variant="outlined">
               <InputLabel id="estado-label">Estado</InputLabel>
@@ -515,7 +665,9 @@ const EditarPedido = () => {
 
           <Grid2 xs={12} md={4} sm={6} width={"30%"}>
             <Typography variant="h5" gutterBottom fontWeight="bold" mb={2}>
-              Información de Pago
+              {formData.pagos.length > 0
+                ? "Información de Pago"
+                : "Registrar Método de Pago"}
             </Typography>
 
             {formData.pagos.length > 0 ? (
@@ -583,9 +735,34 @@ const EditarPedido = () => {
                 );
               })
             ) : (
-              <Typography color="textSecondary" fontSize={"1.2rem"}>
-                No hay información de pago asociada a este pedido.
-              </Typography>
+              <>
+                <InfoFieldGroup
+                  fields={[
+                    {
+                      type: "select",
+                      label: "Método de Pago",
+                      value: selectedMetodoPago,
+                      onChange: handleMetodoPagoChange,
+                      name: "nuevo_metodo_pago",
+                      options: paymentMethods.map((method) => ({
+                        value: method.label,
+                        label: method.label,
+                      })),
+                    },
+                  ]}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleRegistrarMetodoPago}
+                  disabled={!selectedMetodoPago || isRegisteringPago}
+                  sx={{ mt: 1 }}
+                >
+                  {isRegisteringPago
+                    ? "Registrando..."
+                    : "Registrar Método de Pago"}
+                </Button>
+              </>
             )}
           </Grid2>
 
@@ -699,7 +876,7 @@ const EditarPedido = () => {
         <Button
           variant="outlined"
           color="inherit"
-          onClick={() => navigate("/pedidos")}
+          onClick={() => navigate("/ventas")}
         >
           Cancelar
         </Button>
@@ -745,8 +922,36 @@ const EditarPedido = () => {
         title="Confirmar Eliminación"
         message={`¿Está seguro de que desea eliminar al chofer?`}
       />
+      <ModalForm
+        open={openPaymentModal}
+        onClose={handleClosePaymentModal}
+        onSubmit={handleComplete}
+        title="Registrar Pago"
+        fields={[
+          {
+            type: "text",
+            label: "Método de Pago Actual",
+            name: "metodo_pago",
+            defaultValue: paymentData.metodo_pago,
+            disabled: true,
+          },
+          {
+            type: "number",
+            label: "Monto",
+            name: "monto",
+            defaultValue: paymentData.monto || "",
+
+          },
+          {
+            type: "text",
+            label: "Referencia",
+            name: "referencia",
+            defaultValue: paymentData.referencia || "",
+          },
+        ]}
+      />
     </Box>
   );
 };
 
-export default EditarPedido;
+export default EditarVenta;

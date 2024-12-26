@@ -12,6 +12,12 @@ import { estadosFacturaApi } from "./estadosFacturaApi";
 import { pagosApi } from "./pagosApi";
 import { estadosTransaccionApi } from "./estadoTransaccionApi";
 import { estadosDetallesApi } from "./estadoDetallesApi";
+import { rolesApi } from "./rolesApi";
+import permisosApi from "./permisosRolesApi";
+import logTransaccionesApi from "./logTransaccionesApi";
+import auditLogsApi from "./auditLogsApi";
+import { empresaApi } from "./empresaApi";
+
 //import { ventasApi } from "./ventasApi";
 //import { proveedoresApi } from "./proveedoresApi";
 
@@ -29,6 +35,11 @@ export const apiMiddleware = [
   estadosFacturaApi.middleware,
   pagosApi.middleware,
   estadosDetallesApi.middleware,
+  rolesApi.middleware,
+  permisosApi.middleware,
+  logTransaccionesApi.middleware,
+  auditLogsApi.middleware,
+  empresaApi.middleware,
   /*ventasApi.middleware,
   proveedoresApi.middleware, */
 ];
@@ -47,11 +58,16 @@ export const apiReducers = {
   [estadosFacturaApi.reducerPath]: estadosFacturaApi.reducer,
   [pagosApi.reducerPath]: pagosApi.reducer,
   [estadosDetallesApi.reducerPath]: estadosDetallesApi.reducer,
+  [rolesApi.reducerPath]: rolesApi.reducer,
+  [permisosApi.reducerPath]: permisosApi.reducer,
+  [logTransaccionesApi.reducerPath]: logTransaccionesApi.reducer,
+  [auditLogsApi.reducerPath]: auditLogsApi.reducer,
+  [empresaApi.reducerPath]: empresaApi.reducer,
   /*[ventasApi.reducerPath]: ventasApi.reducer,
   [proveedoresApi.reducerPath]: proveedoresApi.reducer, */
 };
 
-export default {
+const apiServices = {
   authApi,
   usuariosApi,
   clientesApi,
@@ -64,7 +80,14 @@ export default {
   facturasApi,
   estadosFacturaApi,
   pagosApi,
-  estadosDetallesApi
+  estadosDetallesApi,
+  rolesApi,
+  permisosApi,
+  logTransaccionesApi,
+  auditLogsApi,
+  empresaApi
   /*ventasApi,
   proveedoresApi, */
 };
+
+export default apiServices;

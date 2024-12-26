@@ -4,18 +4,18 @@ import {
   TextField,
   IconButton,
   Typography,
-  Button,
   Select,
   MenuItem,
 } from "@mui/material";
 import AsyncSelect from "react-select/async";
 import { DeleteOutline } from "@mui/icons-material";
-import { useDeleteDetalleMutation } from "../../../services/ventasApi";
 import { useDispatch } from "react-redux";
-import { showNotification } from "../../../state/reducers/notificacionSlice";
-import { useGetEstadosDetalleQuery } from "../../../services/estadoDetallesApi";
+import { useDeleteDetalleMutation } from "../../services/ventasApi";
+import { useGetEstadosDetalleQuery } from "../../services/estadoDetallesApi";
+import { showNotification } from "../../state/reducers/notificacionSlice";
 
-const DetallePedido = ({
+
+const DetallesTransaccion = ({
   detallesIniciales,
   productos,
   onDetallesChange,
@@ -289,4 +289,4 @@ const DetallePedido = ({
   );
 };
 
-export default DetallePedido;
+export default DetallesTransaccion;

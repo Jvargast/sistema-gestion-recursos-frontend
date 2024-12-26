@@ -4,7 +4,9 @@ import { API_URL } from "./apiBase";
 export const clientesApi = createApi({
   reducerPath: "clientesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL
+      ? process.env.REACT_APP_BASE_URL
+      : API_URL,
     credentials: "include", // Para enviar/recibir cookies si es necesario
   }),
   tagTypes: ["Cliente"], // Identificador para invalidar cache
@@ -24,12 +26,15 @@ export const clientesApi = createApi({
 
     // Obtener todos los clientes
     getAllClientes: builder.query({
-      query: () => `/clientes/`,
+      query: (params) => ({ url: `/clientes/`, params }),
       providesTags: ["Cliente"], // Cache para invalidar al crear o actualizar clientes
+      transformResponse: (response) => ({
+        clientes: response.data, // El array de transacciones
+        paginacion: response.total,   // Datos de paginación
+      }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-
         } catch (error) {
           console.error("Error al obtener la lista de clientes:", error);
         }
@@ -46,8 +51,7 @@ export const clientesApi = createApi({
       invalidatesTags: ["Cliente"], // Invalida cache
       async onQueryStarted(args, { queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
-          console.log("Cliente creado exitosamente:", data);
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al crear cliente:", error);
         }
@@ -55,11 +59,11 @@ export const clientesApi = createApi({
     }),
 
     // Actualizar un cliente
-    updateClient: builder.mutation({
-      query: ({ id, updates }) => ({
+    updateCliente: builder.mutation({
+      query: ({ id, ...formData }) => ({
         url: `/clientes/${id}`,
         method: "PUT",
-        body: updates,
+        body: {...formData},
       }),
       invalidatesTags: ["Cliente"], // Invalida cache
       async onQueryStarted(args, { queryFulfilled }) {
@@ -71,7 +75,22 @@ export const clientesApi = createApi({
         }
       },
     }),
-
+    // Borrar muchos clientes
+    deleteClientes: builder.mutation({
+      query: ({ ids }) => ({
+        url: `/clientes/`,
+        method: "PATCH",
+        body: { ids }, // Enviamos el array de IDs en el body
+      }),
+      invalidatesTags: ["Cliente"], // Invalida el caché
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al eliminar clientes:", error);
+        }
+      },
+    }),
     // Desactivar un cliente
     deactivateCliente: builder.mutation({
       query: (id) => ({
@@ -91,20 +110,20 @@ export const clientesApi = createApi({
 
     // Reactivar un cliente
     reactivateCliente: builder.mutation({
-        query: (id) => ({
-          url: `/clientes/${id}/reactivate`,
-          method: "PATCH",
-        }),
-        invalidatesTags: ["Cliente"], // Invalida cache
-        async onQueryStarted(args, { queryFulfilled }) {
-          try {
-            await queryFulfilled;
-            console.log("Cliente reactivado correctamente");
-          } catch (error) {
-            console.error("Error al eliminar cliente:", error);
-          }
-        },
+      query: (id) => ({
+        url: `/clientes/${id}/reactivate`,
+        method: "PATCH",
       }),
+      invalidatesTags: ["Cliente"], // Invalida cache
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          console.log("Cliente reactivado correctamente");
+        } catch (error) {
+          console.error("Error al eliminar cliente:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -113,9 +132,10 @@ export const {
   useGetClienteByIdQuery,
   useGetAllClientesQuery,
   useCreateClienteMutation,
-  useUpdateClientMutation,
+  useUpdateClienteMutation,
+  useDeleteClientesMutation,
   useDeactivateClienteMutation,
-  useReactivateClienteMutation
+  useReactivateClienteMutation,
 } = clientesApi;
 
 export default clientesApi;

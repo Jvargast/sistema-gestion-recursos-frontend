@@ -108,9 +108,11 @@ const Login = () => {
           onChange={handleInputChange}
           fullWidth
           InputLabelProps={{
+            shrink: true,
             style: { fontSize: "1.2rem" },
           }}
           InputProps={{ style: { fontSize: "1.2rem" } }}
+          autoComplete="username"
         />
         <TextField
           label="Contraseña"
@@ -130,8 +132,10 @@ const Login = () => {
             ),
           }}
           InputLabelProps={{
+            shrink: true,
             style: { fontSize: "1.2rem" },
           }}
+          autoComplete="current-password"
         />
         <Button
           variant="contained"

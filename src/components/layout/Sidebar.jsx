@@ -40,7 +40,6 @@ import PaymentOutlinedIcon from "@mui/icons-material/PaymentOutlined";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
-import profileImage from "../../assets/images/profile.jpeg";
 import logoImage from "../../assets/images/logo_aguas_valentino2.png";
 
 const navItems = [
@@ -113,19 +112,19 @@ const navItems = [
     icon: null,
   },
   {
-    text: "Daily",
+    text: "Diario",
     icon: <TodayOutlined />,
   },
   {
-    text: "Monthly",
+    text: "Mensual",
     icon: <CalendarMonthOutlined />,
   },
   {
-    text: "Breakdown",
+    text: "Estadísticas",
     icon: <PieChartOutlined />,
   },
   {
-    text: "Management",
+    text: "Gestión",
     icon: null,
   },
   {

@@ -4,7 +4,9 @@ import { API_URL } from "./apiBase";
 export const usuariosApi = createApi({
   reducerPath: "usuariosApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_BASE_URL ?  process.env.REACT_APP_BASE_URL : API_URL,
+    baseUrl: process.env.REACT_APP_BASE_URL
+      ? process.env.REACT_APP_BASE_URL
+      : API_URL,
     credentials: "include",
   }),
   tagTypes: ["User"],
@@ -15,7 +17,7 @@ export const usuariosApi = createApi({
       providesTags: ["User"], // Cache de usuarios
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al obtener usuario por RUT:", error);
         }
@@ -23,8 +25,12 @@ export const usuariosApi = createApi({
     }),
     // Obtener todos los usuarios
     getAllUsers: builder.query({
-      query: () => `/usuarios/`,
+      query: (params) => ({ url: `/usuarios/`, params }),
       providesTags: ["User"], // Cache para invalidar al crear o actualizar usuarios
+      transformResponse: (response) => ({
+        usuarios: response.data, // El array de usuarios
+        paginacion: response.total,   // Datos de paginación
+      }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
@@ -39,9 +45,9 @@ export const usuariosApi = createApi({
       providesTags: ["User"],
     }),
     // Crear un usuario
-    createUser: builder.mutation({
+    createNewUser: builder.mutation({
       query: (newUser) => ({
-        url: `/usuarios/`,
+        url: `/usuarios/crear`,
         method: "POST",
         body: newUser,
       }),
@@ -95,9 +101,9 @@ export const usuariosApi = createApi({
 export const {
   useFindByRutQuery,
   useGetAllUsersQuery,
-  useCreateUserMutation,
-  useUpdateUserMutation, 
-  useDeleteUserMutation, 
+  useCreateNewUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
   useGetAllChoferesQuery,
 } = usuariosApi;
 export default usuariosApi;
