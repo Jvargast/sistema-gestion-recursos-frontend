@@ -135,7 +135,7 @@ export const modulesData = [
         text: "Ventas Chofer",
         icon:<ReceiptOutlinedIcon/> ,
         path: "ventas-chofer",
-        permission: "ver_ventas",
+        permission: "ver_ventas_chofer",
       },
       {
         text: "Entregas Realizadas",
