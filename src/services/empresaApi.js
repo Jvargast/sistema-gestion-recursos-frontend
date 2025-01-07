@@ -36,7 +36,45 @@ export const empresaApi = createApi({
         }
       },
     }),
+    // Obtener empresa por ID
+    getEmpresaById: builder.query({
+      query: (id) => `/empresas/${id}`,
+      providesTags: (result, error, id) => [{ type: "Empresa", id }],
+    }),
+
+    // Actualizar empresa
+    updateEmpresa: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/empresas/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Empresa", id }],
+    }),
+
+    // Obtener sucursal por ID
+    getSucursalById: builder.query({
+      query: (id) => `/sucursales/${id}`,
+      providesTags: (result, error, id) => [{ type: "Sucursal", id }],
+    }),
+
+    // Actualizar sucursal
+    updateSucursal: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/sucursales/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Sucursal", id }],
+    }),
   }),
 });
 
-export const { useGetAllEmpresasQuery, useGetAllSucursalsQuery } = empresaApi;
+export const {
+  useGetAllEmpresasQuery,
+  useGetAllSucursalsQuery,
+  useGetEmpresaByIdQuery,
+  useGetSucursalByIdQuery,
+  useUpdateEmpresaMutation,
+  useUpdateSucursalMutation,
+} = empresaApi;

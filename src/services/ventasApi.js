@@ -20,14 +20,76 @@ export const ventasApi = createApi({
       providesTags: ["Transaccion"],
       transformResponse: (response) => ({
         transacciones: response.data, // El array de transacciones
-        paginacion: response.total,   // Datos de paginación
+        paginacion: response.total, // Datos de paginación
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          
         } catch (error) {
           console.error("Error al obtener cotizaciones:", error);
+        }
+      },
+    }),
+
+    getPorcentajesYCantidadVentasNuevas: builder.query({
+      query: (params) => ({
+        url: `/transacciones/nuevos/porcentaje`,
+        params,
+      }),
+      providesTags: ["Transaccion"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener transacciones:", error);
+        }
+      },
+    }),
+
+    getPorcentajesYCantidadVentasNuevasMes: builder.query({
+      query: (params) => ({
+        url: `/transacciones/nuevos/porcentaje/mes`,
+        params,
+      }),
+      providesTags: ["Transaccion"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener transacciones:", error);
+        }
+      },
+    }),
+    getPorcentajesYCantidadVentasNuevasAno: builder.query({
+      query: (params) => ({
+        url: `/transacciones/nuevos/porcentaje/ano`,
+        params,
+      }),
+      providesTags: ["Transaccion"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener transacciones:", error);
+        }
+      },
+    }),
+
+    getPendingTransacciones: builder.query({
+      query: (params) => ({
+        url: `/transacciones/pendientes`,
+        params,
+      }),
+      providesTags: ["Transaccion"],
+      transformResponse: (response) => ({
+        transacciones: response.data, // El array de transacciones
+        paginacion: response.total, // Datos de paginación
+      }),
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener transacciones:", error);
         }
       },
     }),
@@ -215,6 +277,7 @@ export const ventasApi = createApi({
 // Exporta los hooks generados automáticamente
 export const {
   useGetAllTransaccionesQuery,
+  useGetPendingTransaccionesQuery,
   useGetTransaccionByIdQuery,
   useCreateTransaccionMutation,
   useChangeEstadoMutation,
@@ -227,6 +290,9 @@ export const {
   useAsignarTransaccionMutation,
   useEliminarAsignadoTransaccionMutation,
   useChangeMetodoPagoMutation,
+  useGetPorcentajesYCantidadVentasNuevasQuery,
+  useGetPorcentajesYCantidadVentasNuevasAnoQuery,
+  useGetPorcentajesYCantidadVentasNuevasMesQuery,
 } = ventasApi;
 
 export default ventasApi;

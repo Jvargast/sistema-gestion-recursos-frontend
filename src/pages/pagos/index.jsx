@@ -52,32 +52,42 @@ const Pagos = () => {
   const rows = useMemo(() => {
     return data?.pagos
       ? data?.pagos.map((row) => ({
-          ...row,
-          clienteNombre: row.transaccionPago?.cliente?.nombre || "Sin cliente",
-          metodoNombre: row.metodo?.nombre || "Sin método",
-          estadoNombre: row.estado?.nombre || "Sin estado",
           id: row.id_pago,
+          cliente: row.documento?.cliente?.nombre || "Sin cliente",
+          metodo: row.metodo?.nombre || "Sin método",
+          monto: row.monto,
+          fechaPago: row.fecha,
+          referencia: row.referencia || "N/A",
+          tipoDocumento: row.documento?.tipo_documento || "Desconocido",
+          estadoPago: row.documento?.estadoPago?.nombre || "Sin estado",
         }))
       : [];
   }, [data?.pagos]);
 
-
   const columns = [
     { field: "id", headerName: "ID", flex: 0.25, resizable: false },
     {
-      field: "clienteNombre",
+      field: "cliente",
       headerName: "Cliente",
       flex: 0.5,
       resizable: false,
     },
     {
-      field: "metodoNombre",
-      headerName: "Método",
+      field: "metodo",
+      headerName: "Metodo",
       flex: 0.4,
       resizable: false,
     },
     {
-      field: "fecha_pago",
+      field: "monto",
+      headerName: "Monto",
+      flex: 0.3,
+      resizable: false,
+      renderCell: (params) =>
+        `$${Number(params.row?.monto || 0).toLocaleString("es-CL")}`,
+    },
+    {
+      field: "fechaPago",
       headerName: "Fecha de Pago",
       flex: 0.5,
       resizable: false,
@@ -87,15 +97,13 @@ const Pagos = () => {
         }),
     },
     {
-      field: "monto",
-      headerName: "Monto",
-      flex: 0.35,
+      field: "referencia",
+      headerName: "Referencia",
+      flex: 0.4,
       resizable: false,
-      renderCell: (params) =>
-        `$${Number(params.row?.monto || 0).toLocaleString()}`,
     },
     {
-      field: "estadoNombre",
+      field: "estadoPago",
       headerName: "Estado",
       flex: 0.4,
       resizable: false,

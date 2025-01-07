@@ -11,6 +11,7 @@ import {
   SecurityOutlined,
   SupervisorAccountOutlined,
 } from "@mui/icons-material";
+import BusinessIcon from '@mui/icons-material/Business';
 import { useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -30,7 +31,7 @@ const navItems = [
     text: "Almacén",
     icon: <Inventory2OutlinedIcon className="text-pink-500" />,
     description: "Gestión de productos e insumos",
-    path: "/almacen",
+    path: "/productos",
   },
   {
     text: "Proveedores y Mensajes",
@@ -67,6 +68,12 @@ const navItems = [
     icon: <AssignmentIndOutlined className="text-yellow-500" />,
     description: "Gestión de roles y Permisos",
     path: "/roles",
+  },
+  {
+    text: "Empresa",
+    icon: <BusinessIcon className="text-zinc-500" />,
+    description: "Gestión de empresa y sucursales",
+    path: "/empresa",
   },
 ];
 

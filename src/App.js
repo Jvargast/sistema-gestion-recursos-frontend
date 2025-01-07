@@ -24,7 +24,6 @@ import Pagos from "./pages/pagos";
 import Administracion from "./pages/administracion";
 import EditarFactura from "./pages/facturas/EditarFactura";
 import { logout, setUser } from "./state/reducers/authSlice";
-import { API_URL } from "./services/apiBase";
 import CrearCliente from "./pages/clientes/CrearCliente";
 import EditarCotizacion from "./pages/transacciones/cotizaciones/EditarCotizacion";
 import EditarPedido from "./pages/transacciones/pedidos/EditarPedido";
@@ -36,49 +35,53 @@ import Seguridad from "./pages/administracion/seguridad";
 import RoleManagement from "./pages/administracion/Roles/RoleManagement";
 import EditRole from "./pages/administracion/Roles/EditRoleManagement";
 import UserManagement from "./pages/administracion/usuarios";
-
+import EditUserPage from "./pages/administracion/usuarios/EditUserPage";
+import CategoriaManagement from "./pages/categorias";
+import NotFoundPage from "./pages/NotFoundPage";
+import EntregasManagement from "./pages/entregas/EntregasManagement";
+import Empresa from "./pages/administracion/empresa";
+import EstadisticasAno from "./pages/analisis/PanelEstadisticas";
+import AgendaManagement from "./pages/entregas/AgendaManagement";
+import CamionesManagement from "./pages/entregas/CamionesManagement";
+import AgendaDetail from "./pages/entregas/AgendaDetail";
+import EntregasCompletadas from "./pages/entregas/EntregasCompletadas";
+import PanelEstadisticas from "./pages/analisis/PanelEstadisticas";
+import { useGetAuthenticatedUserQuery } from "./services/authApi";
+import LoaderComponent from "./components/common/LoaderComponent";
+import RoleBasedRoute from "./components/utils/RoleBasedRoute";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import EditarProducto from "./pages/productos/EditarProducto";
+import EditarInsumo from "./pages/insumos/EditarInsumo";
+import VentasChofer from "./pages/entregas/VentasChofer";
+import EditarEmpresa from "./pages/administracion/empresa/EditarEmpresa";
+import Perfil from "./pages/perfil";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
-  const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+  const rol = useSelector((state) => state.auth.rol);
+  const theme = useMemo(
+    () => createTheme(themeSettings(mode, rol)),
+    [mode, rol]
+  );
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const syncAuth = async () => {
-      try {
-        //Se debe cambiar para guardar en servidor
-        const response = await fetch(
-          `${
-            process.env.REACT_APP_BASE_URL
-              ? process.env.REACT_APP_BASE_URL
-              : API_URL
-          }/auth/me`,
-          {
-            method: "GET",
-            credentials: "include", // Incluye las cookies
-          }
-        );
-        if (response.ok) {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            dispatch(setUser(data.usuario)); // Sincroniza el estado con el backend
-          } else {
-            console.error("Respuesta no es JSON");
-            dispatch(logout());
-          }
-        } else {
-          console.error("Error en la respuesta del servidor:", response.status);
-          dispatch(logout());
-        }
-      } catch (error) {
-        console.error("Error al sincronizar la autenticación:", error);
-        dispatch(logout());
-      }
-    };
+  const { data, error, isLoading } = useGetAuthenticatedUserQuery();
 
-    syncAuth();
-  }, [dispatch]);
+  useEffect(() => {
+    if (data) {
+      dispatch(setUser(data));
+    } else if (error) {
+      dispatch(logout());
+    } else {
+      dispatch({ type: "auth/setLoading", payload: false }); // En caso de error o sin datos
+      dispatch({ type: "auth/syncCompleted", payload: true });
+    }
+  }, [data, error, dispatch]);
+
+  if (isLoading) {
+    return <LoaderComponent />;
+  }
+
   // Configuración del enrutador
   const router = createBrowserRouter(
     [
@@ -98,28 +101,65 @@ function App() {
                 index: true,
                 element: <Navigate to="/dashboard" replace />,
               },
-              { path: "dashboard", element: <Dashboard /> },
+              {
+                path: "dashboard",
+                element: (
+                  <RoleBasedRoute requiredPermission="ver_dashboard">
+                    <Dashboard />
+                  </RoleBasedRoute>
+                ),
+              },
               { path: "facturas", element: <Facturas /> },
               { path: "facturas/editar/:id", element: <EditarFactura /> },
               { path: "pagos", element: <Pagos /> },
               { path: "pagos/editar/:id", element: <EditarPago /> },
               { path: "cotizaciones", element: <Cotizaciones /> },
-              { path: "cotizaciones/editar/:id", element: <EditarCotizacion /> },
+              {
+                path: "cotizaciones/editar/:id",
+                element: <EditarCotizacion />,
+              },
               { path: "pedidos", element: <Pedidos /> },
               { path: "pedidos/editar/:id", element: <EditarPedido /> },
               { path: "ventas", element: <Ventas /> },
-              { path: "ventas/editar/:id", element: <EditarVenta/>},
+              { path: "ventas/editar/:id", element: <EditarVenta /> },
               { path: "clientes", element: <Clientes /> },
               { path: "clientes/crear", element: <CrearCliente /> },
-              { path: "clientes/ver/:id", element: <VerCliente/> },
-              { path: "clientes/editar/:id", element: <EditarCliente/> },
+              { path: "clientes/ver/:id", element: <VerCliente /> },
+              { path: "clientes/editar/:id", element: <EditarCliente /> },
               { path: "productos", element: <Productos /> },
+              { path: "productos/editar/:id", element: <EditarProducto /> },
               { path: "insumos", element: <Insumos /> },
+              { path: "insumos/editar/:id", element: <EditarInsumo /> },
+              { path: "categorias", element: <CategoriaManagement /> },
+              {
+                path: "entregas-completadas",
+                element: <EntregasCompletadas />,
+              },
+              {
+                path: "ventas-chofer",
+                element: <VentasChofer />,
+              },
+              { path: "entregas", element: <EntregasManagement /> },
+              { path: "camiones", element: <CamionesManagement /> },
+              { path: "agendas", element: <AgendaManagement /> },
+              { path: "agendas/editar/:id", element: <AgendaDetail /> },
               { path: "usuarios", element: <UserManagement /> },
-              { path: "admin", element: <Administracion /> },
+              { path: "miperfil", element: <Perfil /> },
+              { path: "usuarios/editar/:id", element: <EditUserPage /> },
+              {
+                path: "admin",
+                element: (
+                  <RoleBasedRoute requiredPermission="ver_administrador">
+                    <Administracion />
+                  </RoleBasedRoute>
+                ),
+              },
               { path: "roles", element: <RoleManagement /> },
               { path: "roles/editar/:id", element: <EditRole /> },
               { path: "seguridad", element: <Seguridad /> },
+              { path: "empresa", element: <Empresa /> },
+              { path: "empresa/editar/:id", element: <EditarEmpresa /> },
+              { path: "estadisticas", element: <PanelEstadisticas /> },
               // Agrega otras rutas aquí...
             ],
           },
@@ -128,7 +168,11 @@ function App() {
       // Redirige cualquier ruta desconocida al login
       {
         path: "*",
-        element: <Navigate to="/login" replace />,
+        element: <NotFoundPage />,
+      },
+      {
+        path: "/unauthorized",
+        element: <UnauthorizedPage />,
       },
     ],
     {

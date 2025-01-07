@@ -20,12 +20,13 @@ const usePaginatedData = (queryFn) => {
 
   const paginacion = data?.paginacion || {
     totalItems: 0,
-    totalPages: 0,
+    totalPages: Math.ceil((data?.total || 0) / queryParams.limit),
     currentPage: queryParams.page,
     pageSize: queryParams.limit,
   };
 
-  const rows = data?.logs || data?.auditLogs || data?.usuarios || []; // Ajustar según la respuesta de tu API
+  const rows =
+    data?.logs || data?.auditLogs || data?.usuarios || data?.prodcuctos || []; // Ajustar según la respuesta de tu API
 
   return {
     data: rows,
@@ -38,4 +39,3 @@ const usePaginatedData = (queryFn) => {
 };
 
 export default usePaginatedData;
-

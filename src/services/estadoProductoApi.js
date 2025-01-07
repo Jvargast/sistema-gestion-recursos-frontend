@@ -18,8 +18,7 @@ export const estadoProductoApi = createApi({
       providesTags: ["EstadosProductos"],
       async onQueryStarted(args, {queryFulfilled}) {
         try {
-            const {data} = await queryFulfilled;
-            console.log("Lista de estados obtenida:", data);
+            await queryFulfilled;
         } catch (error) {
             console.log("Error al obtener la lista de estados", error)
         }

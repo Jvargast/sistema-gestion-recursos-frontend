@@ -14,7 +14,7 @@ import { useGetAllClientesQuery } from "../../../services/clientesApi";
 import ModalForm from "../../../components/common/ModalForm";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
+//import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import LoaderComponent from "../../../components/common/LoaderComponent";
@@ -39,7 +39,7 @@ const Cotizaciones = () => {
     tipo_transaccion: "cotizacion",
     search,
     page: page + 1,
-    limit: pageSize
+    limit: pageSize,
   });
 
   // Estados para eliminar
@@ -56,27 +56,23 @@ const Cotizaciones = () => {
 
   const { data: productosData, isLoading: isLoadingProductos } =
     useGetAllProductosQuery({ search: searchTerm });
-  const [
-    createCotizacion,
-    { isLoading: isCreating, isError },
-  ] = useCreateTransaccionMutation();
+  const [createCotizacion, { isLoading: isCreating, isError }] =
+    useCreateTransaccionMutation();
   const { data: clientes, isLoadingClientes } = useGetAllClientesQuery();
-  const { data: metodosPago, isLoading: isLoadingMetodosPago } =
-    useGetMetodosDePagoQuery();
-
+  /* const { data: metodosPago, isLoading: isLoadingMetodosPago } =
+    useGetMetodosDePagoQuery(); */
 
   const isLoadingAll =
-    isLoading ||
-    isLoadingProductos ||
-    isLoadingClientes ||
-    isLoadingMetodosPago;
+    isLoading || isLoadingProductos || isLoadingClientes; /* ||
+    isLoadingMetodosPago; */
 
   const [selectedRows, setSelectedRows] = useState([]);
   // Modal agregar cotizaciones
   const [open, setOpen] = useState(false);
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   // Mapear filas para la tabla
-  const rows = data?.transacciones ? data?.transacciones.map((row) => ({
+  const rows = data?.transacciones
+    ? data?.transacciones.map((row) => ({
         ...row,
 
         clienteNombre: row.cliente?.nombre || "Sin cliente",
@@ -113,7 +109,7 @@ const Cotizaciones = () => {
     },
     {
       field: "fecha_creacion",
-      headerName: "Fecha Creación",
+      headerName: "Fecha Creacion",
       flex: 0.5,
       resizable: false,
       renderCell: (params) => {
@@ -159,7 +155,6 @@ const Cotizaciones = () => {
           >
             <EditIcon />
           </IconButton>
-
         </Box>
       ),
     },
@@ -182,7 +177,7 @@ const Cotizaciones = () => {
       searchOption: "Agregar Nuevo Cliente",
     },
     { name: "observaciones", label: "Observaciones", type: "text" },
-    {
+    /* {
       name: "id_metodo_pago",
       label: "Método de Pago",
       type: "select",
@@ -193,12 +188,12 @@ const Cotizaciones = () => {
           }))
         : [],
       defaultValue: "",
-    },
+    }, */
     {
       name: "detalles",
       label: "Detalles",
       type: "custom",
-      productos: productosData ? productosData : [],
+      productos: productosData ? productosData.productos : [],
       setSearchTerm, // Pasa la función que actualiza el término de búsqueda
     },
   ];
@@ -276,7 +271,7 @@ const Cotizaciones = () => {
    */
 
   const rowsPerPageOptions = [5, 10, 25, 50];
-  
+
   if (isLoadingAll) {
     return <LoaderComponent />;
   }
@@ -338,7 +333,7 @@ const Cotizaciones = () => {
           rows={rows}
           columns={columns}
           /* rowCount={paginacion?.totalItems || 0} */
-          paginationMode="server" 
+          paginationMode="server"
           rowCount={paginacion?.totalItems || rows.length}
           paginationModel={{
             pageSize: pageSize,
@@ -350,7 +345,18 @@ const Cotizaciones = () => {
           }}
           pagination
           checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+          onRowSelectionModelChange={(sequentialIds) => {
+            // Mapea sequentialIds a id_transaccion
+            const selectedIds = sequentialIds
+              .map((sequentialId) => {
+                const row = rows.find(
+                  (row) => row.sequentialId === sequentialId
+                );
+                return row?.id_transaccion; // Retorna id_transaccion si la fila es encontrada
+              })
+              .filter((id) => id); // Filtra IDs no válidos o undefined
+            setSelectedRows(selectedIds);
+          }}
           pageSizeOptions={rowsPerPageOptions}
           sx={{
             color: "black",

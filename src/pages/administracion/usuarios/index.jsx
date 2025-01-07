@@ -23,10 +23,15 @@ import {
 } from "../../../services/empresaApi";
 import ModalForm from "../../../components/common/ModalForm";
 import { useGetAllRolesQuery } from "../../../services/rolesApi";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../../state/reducers/notificacionSlice";
 
 const UserManagement = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [createNewUser] = useCreateNewUserMutation();
+  const dispatch = useDispatch();
 
   const {
     data: usuarios,
@@ -160,13 +165,26 @@ const UserManagement = () => {
     try {
       await createNewUser(newUser).unwrap();
       setOpen(false); // Cierra el modal tras éxito
+      dispatch(
+        showNotification({
+          message: "Usuario Creado con éxito",
+          severity: "success",
+        })
+      );
     } catch (error) {
-      console.error("Error al crear usuario:", error);
+      dispatch(
+        showNotification({
+          message: `Error al crear usuario: ${
+            error?.data?.error || "Desconocido"
+          }`,
+          severity: "error",
+        })
+      );
     }
   };
 
   const handleEdit = (user) => {
-    console.log("Editar usuario:", user);
+    navigate(`/usuarios/editar/${user.rut}`);
     // Implementa la lógica para editar
   };
 

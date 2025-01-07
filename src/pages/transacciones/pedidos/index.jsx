@@ -16,7 +16,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
 import { useGetAllClientesQuery } from "../../../services/clientesApi";
-import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
+//import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
 import LoaderComponent from "../../../components/common/LoaderComponent";
 import ModalForm from "../../../components/common/ModalForm";
 import AlertDialog from "../../../components/common/AlertDialog";
@@ -40,21 +40,17 @@ const Pedidos = () => {
       tipo_transaccion: "pedido",
       search,
       page: page + 1,
-      limit: pageSize
+      limit: pageSize,
     });
 
-  const [
-    createPedido,
-    { isLoading: isCreating },
-  ] = useCreateTransaccionMutation();
+  const [createPedido, { isLoading: isCreating }] =
+    useCreateTransaccionMutation();
 
-  
   // Estados para eliminar
   const [openAlert, setOpenAlert] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteTransacciones, { isLoading: isDeleting }] =
     useDeleteTransaccionesMutation();
-
 
   useEffect(() => {
     // Detecta si hay un estado de refetch
@@ -67,20 +63,19 @@ const Pedidos = () => {
     useGetAllProductosQuery({ search: searchTerm });
   const { data: clientes, isLoading: isLoadingClientes } =
     useGetAllClientesQuery();
-  const { data: metodosPago, isLoading: isLoadingMetodosPago } =
-    useGetMetodosDePagoQuery();
+  /* const { data: metodosPago, isLoading: isLoadingMetodosPago } =
+    useGetMetodosDePagoQuery(); */
 
   const isLoadingAll =
-    isLoading ||
-    isLoadingProductos ||
-    isLoadingClientes ||
-    isLoadingMetodosPago;
+    isLoading || isLoadingProductos || isLoadingClientes; /* ||
+    isLoadingMetodosPago; */
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
   const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   // Mapear filas para la tabla
-  const rows = data?.transacciones ? data?.transacciones.map((row) => ({
+  const rows = data?.transacciones
+    ? data?.transacciones.map((row) => ({
         ...row,
         clienteNombre: row.cliente?.nombre || "Sin cliente",
         usuarioNombre: row.usuario?.nombre || "Sin usuario",
@@ -184,7 +179,7 @@ const Pedidos = () => {
       searchOption: "Agregar Nuevo Cliente",
     },
     { name: "observaciones", label: "Observaciones", type: "text" },
-    {
+    /* {
       name: "id_metodo_pago",
       label: "Método de Pago",
       type: "select",
@@ -195,12 +190,12 @@ const Pedidos = () => {
           }))
         : [],
       defaultValue: "",
-    },
+    }, */
     {
       name: "detalles",
       label: "Detalles",
       type: "custom",
-      productos: productosData ? productosData : [],
+      productos: productosData ? productosData.productos : [],
       setSearchTerm, // Pasa la función que actualiza el término de búsqueda
     },
   ];
@@ -229,12 +224,11 @@ const Pedidos = () => {
 
   // Función para manejar la acción de editar
   const handleEdit = (row) => {
-    navigate(`/pedidos/editar/${row.id_transaccion}`, { state: { refetch: true } });
+    navigate(`/pedidos/editar/${row.id_transaccion}`, {
+      state: { refetch: true },
+    });
     // Aquí puedes implementar lógica adicional, como abrir un modal para editar la cotización
   };
-
-
-  
 
   // Función para abrir la alerta de confirmación
   const handleOpenDelete = () => {
@@ -347,7 +341,18 @@ const Pedidos = () => {
           pagination
           pageSizeOptions={rowsPerPageOptions}
           checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+          onRowSelectionModelChange={(sequentialIds) => {
+            // Mapea sequentialIds a id_transaccion
+            const selectedIds = sequentialIds
+              .map((sequentialId) => {
+                const row = rows.find(
+                  (row) => row.sequentialId === sequentialId
+                );
+                return row?.id_transaccion; // Retorna id_transaccion si la fila es encontrada
+              })
+              .filter((id) => id); // Filtra IDs no válidos o undefined
+            setSelectedRows(selectedIds);
+          }}
           paginationMode="server"
           sortingMode="client"
           sx={{ color: "black", fontWeight: 400, fontSize: "1rem" }}
@@ -374,7 +379,6 @@ const Pedidos = () => {
         title="Confirmar Eliminación"
         message={`¿Está seguro de que desea eliminar las ${selectedRows.length} transacciones seleccionadas?`}
       />
-      
     </Box>
   );
 };

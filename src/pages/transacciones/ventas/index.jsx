@@ -3,9 +3,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Box, Button, IconButton, useTheme } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import {
-  DataGrid,
-} from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid";
 import Header from "../../../components/common/Header";
 import DataGridCustomToolbar from "../../../components/common/DataGridCustomToolbar";
 import {
@@ -18,7 +16,7 @@ import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGetAllProductosQuery } from "../../../services/inventarioApi";
 import { useGetAllClientesQuery } from "../../../services/clientesApi";
-import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
+//import { useGetMetodosDePagoQuery } from "../../../services/pagosApi";
 import { showNotification } from "../../../state/reducers/notificacionSlice";
 import LoaderComponent from "../../../components/common/LoaderComponent";
 import ModalForm from "../../../components/common/ModalForm";
@@ -47,10 +45,9 @@ const Ventas = () => {
       limit: pageSize,
     });
 
-  const [
-    createVenta,
-    { isLoading: isCreating},
-  ] = useCreateTransaccionMutation();
+  const [createVenta, { isLoading: isCreating }] =
+    useCreateTransaccionMutation();
+
 
   // Estados para eliminar
   const [openAlert, setOpenAlert] = useState(false);
@@ -69,14 +66,11 @@ const Ventas = () => {
     useGetAllProductosQuery({ search: searchTerm });
   const { data: clientes, isLoading: isLoadingClientes } =
     useGetAllClientesQuery();
-  const { data: metodosPago, isLoading: isLoadingMetodosPago } =
-    useGetMetodosDePagoQuery();
+  /* const { data: metodosPago, isLoading: isLoadingMetodosPago } =
+    useGetMetodosDePagoQuery(); */
 
-  const isLoadingAll =
-    isLoading ||
-    isLoadingProductos ||
-    isLoadingClientes ||
-    isLoadingMetodosPago;
+  const isLoadingAll = isLoading || isLoadingProductos || isLoadingClientes;
+  /* isLoadingMetodosPago; */
   // Mapear filas para la tabla
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
@@ -189,7 +183,7 @@ const Ventas = () => {
       searchOption: "Agregar Nuevo Cliente",
     },
     { name: "observaciones", label: "Observaciones", type: "text" },
-    {
+    /* {
       name: "id_metodo_pago",
       label: "Método de Pago",
       type: "select",
@@ -200,12 +194,12 @@ const Ventas = () => {
           }))
         : [],
       defaultValue: "",
-    },
+    }, */
     {
       name: "detalles",
       label: "Detalles",
       type: "custom",
-      productos: productosData ? productosData : [],
+      productos: productosData ? productosData.productos : [],
       setSearchTerm, // Pasa la función que actualiza el término de búsqueda
     },
   ];
@@ -347,7 +341,7 @@ const Ventas = () => {
           rows={rows}
           columns={columns}
           /* rowCount={paginacion?.totalItems || 0} */
-          paginationMode="server" 
+          paginationMode="server"
           rowCount={paginacion?.totalItems || rows.length}
           paginationModel={{
             pageSize: pageSize,
@@ -356,7 +350,18 @@ const Ventas = () => {
           onPaginationModelChange={handlePageChange}
           pagination
           checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+          onRowSelectionModelChange={(sequentialIds) => {
+            // Mapea sequentialIds a id_transaccion
+            const selectedIds = sequentialIds
+              .map((sequentialId) => {
+                const row = rows.find(
+                  (row) => row.sequentialId === sequentialId
+                );
+                return row?.id_transaccion; // Retorna id_transaccion si la fila es encontrada
+              })
+              .filter((id) => id); // Filtra IDs no válidos o undefined
+            setSelectedRows(selectedIds);
+          }}
           pageSizeOptions={rowsPerPageOptions}
           sx={{
             color: "black",

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -13,6 +13,8 @@ import { useLoginMutation } from "../../services/authApi";
 import { useSelector, useDispatch } from "react-redux";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { showNotification } from "../../state/reducers/notificacionSlice";
+import { setUser } from "../../state/reducers/authSlice";
+import { API_URL } from "../../services/apiBase";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const Login = () => {
   const [credentials, setCredentials] = useState({ rut: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, rol, permisos } = useSelector((state) => state.auth);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,17 +34,49 @@ const Login = () => {
     setShowPassword((prev) => !prev);
   };
 
+  const getInitialRoute = (rol, permissions) => {
+    if (rol === "administrador" && permissions.includes("ver_dashboard")) {
+      return "/dashboard";
+    } else if (rol === "vendedor" && permissions.includes("ver_ventas")) {
+      return "/ventas";
+    } else if (rol === "chofer" && permissions.includes("ver_entregas")) {
+      return "/entregas";
+    }
+    // Ruta por defecto si no tiene permisos específicos
+    return "/unauthorized";
+  };
+
+  // Redirige automáticamente si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Obtener permisos desde el estado global
+      if (isAuthenticated) {
+        // Determinar la ruta inicial en base al rol y los permisos
+        const initialRoute = getInitialRoute(rol, permisos);
+        navigate(initialRoute, { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigate, permisos, rol]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await login(credentials).unwrap();
+      const meResponse = await fetch(
+        `${process.env.REACT_APP_BASE_URL || API_URL}/auth/me`,
+        { method: "GET", credentials: "include" }
+      ).then((res) => res.json());
+      dispatch(setUser(meResponse));
+      const { rol, permisos } = meResponse;
+      const initialRoute = getInitialRoute(rol, permisos);
+      navigate(initialRoute, { replace: true });
       dispatch(
         showNotification({
           message: "Inicio de sesión exitoso.",
           severity: "success",
         })
       );
-      navigate("/dashboard");
+      //navigate("/dashboard", { replace: true });
     } catch (error) {
       dispatch(
         showNotification({
@@ -52,13 +86,6 @@ const Login = () => {
       );
     }
   };
-
-  // Redirige automáticamente si ya está autenticado
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard", { replace: true }); // Redirige al dashboard
-    }
-  }, [isAuthenticated, navigate]);
 
   return (
     <Box

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-  LightModeOutlined,
-  DarkModeOutlined,
+  /* LightModeOutlined,
+  DarkModeOutlined, */
   Menu as MenuIcon,
   Search,
   SettingsOutlined,
@@ -9,8 +9,8 @@ import {
 } from "@mui/icons-material";
 import FlexBetween from "./FlexBetween";
 import { useDispatch, useSelector } from "react-redux";
-import { setMode } from "../../state/reducers/globalSlice";
-import profileImage from "../../assets/images/profile.jpeg";
+//import { setMode } from "../../state/reducers/globalSlice";
+//import profileImage from "../../assets/images/profile.jpeg";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   AppBar,
@@ -29,8 +29,9 @@ import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNone
 import { useLogoutMutation } from "../../services/authApi";
 import { useNavigate } from "react-router-dom";
 import { resetCacheAndLogout } from "../../state/reducers/authSlice";
+import { showNotification } from "../../state/reducers/notificacionSlice";
 
-const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
+const Navbar = ({ user, rol, isSidebarOpen, setIsSidebarOpen }) => {
   const dispatch = useDispatch();
   const mode = useSelector((state) => state.global.mode);
   const theme = useTheme();
@@ -62,13 +63,13 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
         boxShadow: "none",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
+      <Toolbar sx={{ justifyContent: "space-between", background: "#E4DFDF" }}>
         {/* LEFT SIDE */}
         <FlexBetween>
           <IconButton
             sx={{
               display: `${isNonMobile ? "" : "none"}`,
-              color: `${mode === "dark" ? "#FFFFFF" : "#000000"}`,
+              color: `${mode === "light" ? "#000000" : "#ffffff"}`,
             }}
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
@@ -99,10 +100,19 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               <DarkModeOutlined sx={{ fontSize: "25px", color: "#0D497D" }} />
             )}
           </IconButton> */}
-          <IconButton>
+          <IconButton
+            onClick={() =>
+              dispatch(
+                showNotification({
+                  message: "Método no implementado",
+                  severity: "info",
+                })
+              )
+            }
+          >
             {theme.palette.mode === "dark" ? (
               <NotificationsNoneOutlinedIcon
-                sx={{ fontSize: "25px", color: "#ffffff" }}
+                sx={{ fontSize: "25px", color: "#000000" }}
               />
             ) : (
               <NotificationsNoneOutlinedIcon
@@ -110,7 +120,16 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               />
             )}
           </IconButton>
-          <IconButton>
+          <IconButton
+            onClick={() =>
+              dispatch(
+                showNotification({
+                  message: "Método no implementado",
+                  severity: "info",
+                })
+              )
+            }
+          >
             {theme.palette.mode === "dark" ? (
               <SettingsOutlined sx={{ fontSize: "25px", color: "#ffffff" }} />
             ) : (
@@ -129,15 +148,6 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                 gap: "1rem",
               }}
             >
-              {/* <Box
-                component="img"
-                alt="profile"
-                src={profileImage}
-                height="32px"
-                width="32px"
-                borderRadius="50%"
-                sx={{ objectFit: "cover" }}
-              /> */}
               <Box>
                 <AccountCircleIcon fontSize="large" />
               </Box>
@@ -149,10 +159,10 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                     color:
                       theme.palette.mode === "dark"
                         ? theme.palette.primary[100]
-                        : theme.palette.secondary[100],
+                        : theme.palette.secondary[50],
                   }}
                 >
-                  {user.nombre}
+                  {user?.nombre || ""}
                 </Typography>
                 <Typography
                   fontSize="0.75rem"
@@ -160,14 +170,14 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
                     color:
                       theme.palette.mode === "dark"
                         ? theme.palette.primary[100]
-                        : theme.palette.secondary[100],
+                        : theme.palette.secondary[50],
                   }}
                 >
-                  {user.rol.nombre}
+                  {rol || ""}
                 </Typography>
               </Box>
               <ArrowDropDownOutlined
-                sx={{ color: theme.palette.secondary[300], fontSize: "25px" }}
+                sx={{ color: theme.palette.secondary[50], fontSize: "25px" }}
               />
             </Button>
             <Menu
@@ -176,6 +186,7 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
               onClose={handleClose}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             >
+              <MenuItem onClick={()=> navigate("/miperfil")}> Mi Perfil</MenuItem>
               <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
             </Menu>
           </FlexBetween>

@@ -13,7 +13,6 @@ import {
   FormControl,
   Grid2,
   IconButton,
-  Grid,
   Divider,
 } from "@mui/material";
 import {
@@ -37,6 +36,7 @@ import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined
 import AlertDialog from "../../../components/common/AlertDialog";
 import InfoFieldGroup from "../../../components/common/InfoFieldGroup";
 import DetallesTransaccion from "../../../components/venta/DetallesTransaccion";
+import BackButton from "../../../components/common/BackButton";
 
 const EditarPedido = () => {
   const { id } = useParams();
@@ -309,7 +309,7 @@ const EditarPedido = () => {
     }
   };
 
-  const paymentMethods = [
+  /* const paymentMethods = [
     { value: 1, label: "Efectivo" },
     { value: 2, label: "Tarjeta crédito" },
     { value: 3, label: "Tarjeta débito" },
@@ -362,10 +362,11 @@ const EditarPedido = () => {
         })
       );
     }
-  };
+  }; */
 
   return (
     <Box m={1.5}>
+      <BackButton to="/pedidos" label="Atrás"/>
       <Typography variant="h4" gutterBottom fontWeight="bold" mb={3}>
         Editar Pedido
       </Typography>
@@ -513,7 +514,7 @@ const EditarPedido = () => {
             />
           </Grid2>
 
-          <Grid2 xs={12} md={4} sm={6} width={"30%"}>
+          {/* <Grid2 xs={12} md={4} sm={6} width={"30%"}>
             <Typography variant="h5" gutterBottom fontWeight="bold" mb={2}>
               Información de Pago
             </Typography>
@@ -587,7 +588,7 @@ const EditarPedido = () => {
                 No hay información de pago asociada a este pedido.
               </Typography>
             )}
-          </Grid2>
+          </Grid2> */}
 
           {/*  Chofer Asignado */}
           <Grid2 xs={12} md={4} sm={6}>
@@ -683,7 +684,7 @@ const EditarPedido = () => {
       {/* Detalles de Productos */}
       <DetallesTransaccion
         detallesIniciales={formData.detalles}
-        productos={productos || []}
+        productos={productos?.productos || []}
         onDetallesChange={(updatedDetalles) => {
           setFormData((prev) => ({
             ...prev,
@@ -724,13 +725,13 @@ const EditarPedido = () => {
         >
           Actualizar Detalles
         </Button>
-        <Button
+        {/* <Button
           variant="contained"
           color="info"
           onClick={handlePago} // Simplemente llama a la función
         >
           {isChangingMetodo ? "Actualizando..." : "Cambiar Método de Pago"}
-        </Button>
+        </Button> */}
       </Box>
       <AssignModal
         open={openAssignModal}

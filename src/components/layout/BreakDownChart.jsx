@@ -1,138 +1,179 @@
-import React from "react";
-import { ResponsivePie } from "@nivo/pie";
-import { Box, Typography, useTheme } from "@mui/material";
+import React, { useState } from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { useGetAllEstadisticasQuery } from "../../services/analisisProductosApi";
 
-/* import { useGetSalesQuery } from "state/api"; */
+/* import { useTheme } from "@mui/material"; */
 
-const BreakdownChart = ({ isDashboard = false }) => {
-  /* const { data, isLoading } = useGetSalesQuery(); */
-  const theme = useTheme();
+const BreakdownChart = () => {
+  const { data, isLoading } = useGetAllEstadisticasQuery({
+    page: 1,
+    limit: 10,
+  });
+  /* const theme = useTheme(); */
 
-  /* if (!data || isLoading ) return "Loading..."; */
+  const [radius, setRadius] = useState(50);
+  const [itemNb, setItemNb] = useState(10);
+  const [skipAnimation, setSkipAnimation] = useState(false);
 
   const colors = [
-    theme.palette.secondary[500],
-    theme.palette.secondary[300],
-    theme.palette.secondary[300],
-    theme.palette.secondary[500],
+    "#E57373",
+    "#81C784",
+    "#64B5F6",
+    "#FFD54F",
+    "#4DD0E1",
+    "#BA68C8",
+    "#FF8A65",
+    "#A1887F",
+    "#90A4AE",
+    "#DCE775",
   ];
-  /* const formattedData = Object.entries(data.salesByCategory).map(
-    ([category, sales], i) => ({
-      id: category,
-      label: category,
-      value: sales,
-      color: colors[i],
-    })
-  ); */
+
+  if (isLoading) return "Cargando...";
+
+  // Transformar datos del endpoint al formato requerido por PieChart
+  const formattedData =
+    data?.data?.map((item, index) => ({
+      label: item.nombre_producto || "Desconocido",
+      value: parseFloat(item.ventas_anuales) || 0,
+      color: colors[index % colors.length],
+      unidades: item.unidades_vendidas_anuales,
+    })) || [];
+
+  const visibleData = formattedData.slice(0, itemNb);
+
+  const valueFormatter = (item) =>
+    `$${item.value.toLocaleString()} (${(
+      (item.value / formattedData.reduce((sum, i) => sum + i.value, 0)) *
+      100
+    ).toFixed(2)}%)`;
+
+  const handleItemNbChange = (event, newValue) => {
+    if (typeof newValue === "number") setItemNb(newValue);
+  };
+
+  const handleRadiusChange = (event, newValue) => {
+    if (typeof newValue === "number") setRadius(newValue);
+  };
 
   return (
     <Box
-      height={isDashboard ? "400px" : "100%"}
-      width={undefined}
-      minHeight={isDashboard ? "325px" : undefined}
-      minWidth={isDashboard ? "325px" : undefined}
-      position="relative"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        padding: "20px",
+        backgroundColor: "#f9f9f9",
+        borderRadius: "10px",
+      }}
     >
-      <ResponsivePie
-        data={/* formattedData */ []}
-        theme={{
-          axis: {
-            domain: {
-              line: {
-                stroke: theme.palette.secondary[200],
-              },
-            },
-            legend: {
-              text: {
-                fill: theme.palette.secondary[200],
-              },
-            },
-            ticks: {
-              line: {
-                stroke: theme.palette.secondary[200],
-                strokeWidth: 1,
-              },
-              text: {
-                fill: theme.palette.secondary[200],
-              },
-            },
-          },
-          legends: {
-            text: {
-              fill: theme.palette.secondary[200],
-            },
-          },
-          tooltip: {
-            container: {
-              color: theme.palette.primary.main,
-            },
-          },
-        }}
-        colors={{ datum: "data.color" } }
-        margin={
-          isDashboard
-            ? { top: 40, right: 80, bottom: 100, left: 50 }
-            : { top: 40, right: 80, bottom: 80, left: 80 }
-        }
-        sortByValue={true}
-        innerRadius={0.45}
-        activeOuterRadiusOffset={8}
-        borderWidth={1}
-        borderColor={{
-          from: "color",
-          modifiers: [["darker", 0.2]],
-        }}
-        enableArcLinkLabels={!isDashboard}
-        arcLinkLabelsTextColor={theme.palette.secondary[200]}
-        arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{ from: "color" }}
-        arcLabelsSkipAngle={10}
-        arcLabelsTextColor={{
-          from: "color",
-          modifiers: [["darker", 2]],
-        }}
-        legends={[
+      <Typography
+        variant="h4"
+        textAlign="center"
+        sx={{ marginBottom: "1rem", fontWeight: "bold", fontSize: "1.5rem" }}
+      >
+        Ventas por Productos
+      </Typography>
+
+      <PieChart
+        height={400}
+        series={[
           {
-            anchor: "bottom",
-            direction: "row",
-            justify: false,
-            translateX: isDashboard ? 20 : 0,
-            translateY: isDashboard ? 50 : 56,
-            itemsSpacing: 0,
-            itemWidth: 85,
-            itemHeight: 18,
-            itemTextColor: "#999",
-            itemDirection: "left-to-right",
-            itemOpacity: 1,
-            symbolSize: 18,
-            symbolShape: "circle",
-            effects: [
-              {
-                on: "hover",
-                style: {
-                  itemTextColor: theme.palette.primary[500],
-                },
-              },
-            ],
+            data: visibleData.map((item) => ({
+              ...item,
+              valueFormatter,
+            })),
+            innerRadius: radius,
+            arcLabel: (params) => `${params.label}`,
+            arcLabelMinAngle: 20,
+            highlightScope: { fade: "global", highlight: "item" },
+            faded: { innerRadius: 30, additionalRadius: -30, color: "gray" },
+            valueFormatter,
           },
         ]}
+        colors={(d, i) => d.color || colors[i % colors.length]}
+        skipAnimation={skipAnimation}
+        sx={{
+          "& .MuiChartsLegend-root": {
+            display: "none !important",
+          },
+          fontSize: "1.2rem",
+        }}
       />
       <Box
-        position="absolute"
-        top="50%"
-        left="50%"
-        color={theme.palette.secondary[400]}
-        textAlign="center"
-        pointerEvents="none"
         sx={{
-          transform: isDashboard
-            ? "translate(-75%, -170%)"
-            : "translate(-50%, -100%)",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          marginTop: "1rem",
         }}
       >
-        <Typography variant="h6">
-          {!isDashboard && "Total:"} ${/* data.yearlySalesTotal */ []}
+        {visibleData.map((item, index) => (
+          <Box
+            key={item.label}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              margin: "0 10px",
+            }}
+          >
+            <Box
+              sx={{
+                width: "16px",
+                height: "16px",
+                backgroundColor: item.color,
+                marginRight: "8px",
+                borderRadius: "50%",
+              }}
+            />
+            <Typography variant="body2">{item.label}</Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box sx={{ marginTop: "1rem" }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={skipAnimation}
+              onChange={(e) => setSkipAnimation(e.target.checked)}
+            />
+          }
+          label="Omitir animación"
+        />
+      </Box>
+      <Box sx={{ marginTop: "1rem" }}>
+        <Typography id="item-slider" gutterBottom>
+          Cantidad de elementos mostrados
         </Typography>
+        <Slider
+          value={itemNb}
+          onChange={handleItemNbChange}
+          valueLabelDisplay="auto"
+          min={1}
+          max={formattedData.length}
+          aria-labelledby="item-slider"
+          sx={{ marginBottom: "1rem", color: "#4DD0E1" }}
+        />
+        <Typography id="radius-slider" gutterBottom>
+          Radio
+        </Typography>
+        <Slider
+          value={radius}
+          onChange={handleRadiusChange}
+          valueLabelDisplay="auto"
+          min={15}
+          max={100}
+          aria-labelledby="radius-slider"
+          sx={{ color: "#4DD0E1" }}
+        />
       </Box>
     </Box>
   );

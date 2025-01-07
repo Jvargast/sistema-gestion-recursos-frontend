@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, IconButton, useTheme } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import {
   useCreateProductoMutation,
-  useDeleteProductoMutation,
+  useDeleteProductosMutation,
   useGetAllProductosQuery,
 } from "../../services/inventarioApi";
 import { useGetAllCategoriasQuery } from "../../services/categoriaApi";
@@ -13,56 +12,84 @@ import { useGetAllEstadosQuery } from "../../services/estadoProductoApi";
 import { DataGrid } from "@mui/x-data-grid";
 import ModalForm from "../../components/common/ModalForm";
 import AlertDialog from "../../components/common/AlertDialog";
+import LoaderComponent from "../../components/common/LoaderComponent";
+import Header from "../../components/common/Header";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import { showNotification } from "../../state/reducers/notificacionSlice";
+import { CustomPagination } from "../../components/common/CustomPagination";
+import DataGridCustomToolbar from "../../components/common/DataGridCustomToolbar";
 
 const Productos = () => {
-  const theme = useTheme();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   // values to be sent to the backend
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+
   const [sort, setSort] = useState({});
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
-  const { data, isLoading } = useGetAllProductosQuery({
+  const [search, setSearch] = useState("");
+
+  /* const { data, isLoading } = useGetAllProductosQuery({
     tipo_producto: "Producto_Terminado",
     search,
+  }); */
+  const { data, isLoading, isError, refetch } = useGetAllProductosQuery({
+    tipo_producto: "Producto_Terminado",
+    search,
+    page: page + 1,
+    limit: pageSize,
   });
+
+  const paginacion = useMemo(() => data?.paginacion || {}, [data?.paginacion]);
   const {
     data: categorias,
     loadingCategorias,
     error,
   } = useGetAllCategoriasQuery();
+
   const {
     data: estados,
     loadingEstados,
-    errorEstados,
+    isError: errorEstados,
   } = useGetAllEstadosQuery();
+
   const [createProducto] = useCreateProductoMutation();
-  const [deleteProducto] = useDeleteProductoMutation();
+  const [deleteProductos, {isLoading: isDeleting}] = useDeleteProductosMutation();
 
   // Selección de filas
   const [selectedRows, setSelectedRows] = useState([]);
-  // Selección producto
-  const [selectedProduct, setSelectedProduct] = useState(null);
+
   // Modal agregar productos
   const [open, setOpen] = useState(false);
   // Dialog Alert
   const [openAlert, setOpenAlert] = useState(false);
+
   // Arreglo de datos
-  const rows = data
-    ? data.map((row) => ({
+  const rows = data?.productos
+    ? data?.productos.map((row) => ({
         ...row,
         categoriaNombre: row.categoria?.nombre_categoria || "Sin categorias",
         inventarioNombre: row.inventario?.cantidad || "Sin inventario",
         estadoNombre: row.estado?.nombre_estado || "Sin estado",
-        image: row.image || "https://via.placeholder.com/50",
         id: row.id_producto,
       }))
     : [];
 
+  useEffect(() => {
+    if (location.state?.refetch) {
+      refetch();
+      navigate("/productos", { replace: true });
+    }
+  }, [location.state, refetch, navigate]);
+
   // Definir las columnas del DataGrid
   const columns = [
     {
-      field: "image",
+      field: "image_url",
       headerName: "Imagen",
       width: 100,
       renderCell: (params) => (
@@ -73,14 +100,12 @@ const Productos = () => {
         />
       ),
     },
-    { field: "id_producto", headerName: "ID", flex: 0.25 },
+    { field: "sequentialId", headerName: "ID", flex: 0.25 },
     { field: "inventarioNombre", headerName: "Stock", flex: 0.315 },
     { field: "nombre_producto", headerName: "Nombre", flex: 0.5 },
     { field: "codigo_barra", headerName: "Código de Barra", flex: 0.5 },
     { field: "marca", headerName: "Marca", flex: 0.3 },
-    { field: "precio", headerName: "Precio", flex: 0.3 },
     { field: "categoriaNombre", headerName: "Categoría", flex: 0.4 },
-    { field: "estadoNombre", headerName: "Estado", flex: 0.5 },
     {
       field: "acciones",
       headerName: "Acciones",
@@ -103,16 +128,6 @@ const Productos = () => {
           >
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={(event) => {
-              event.stopPropagation();
-              /* setOpenAlert(true); */
-              handleDeleteClick(params.row);
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
         </Box>
       ),
     },
@@ -130,15 +145,11 @@ const Productos = () => {
       label: "Categoría",
       type: "select",
       options: categorias
-        ? categorias?.map((categoria) => ({
+        ? categorias.map((categoria) => ({
             value: categoria.id_categoria,
             label: categoria.nombre_categoria,
           }))
         : [],
-      /* [
-        { value: "agua", label: "Agua" },
-        { value: "hielo", label: "Hielo" },
-      ], */
       defaultValue: 1,
     },
     {
@@ -146,7 +157,7 @@ const Productos = () => {
       label: "Estado",
       type: "select",
       options: estados
-        ? estados?.map((estado) => ({
+        ? estados.map((estado) => ({
             value: estado.id_estado_producto,
             label: estado.nombre_estado,
           }))
@@ -158,49 +169,98 @@ const Productos = () => {
       defaultValue: 1,
     },
   ];
+
   // Función para manejar formulario
   const handleSubmit = async (data) => {
     try {
       await createProducto(data).unwrap();
-      console.log("Datos formulario", data);
+      dispatch(showNotification({
+        message: "Se ha creado un nuevo producto",
+        severity: "success"
+      }))
     } catch (error) {
-      alert("Error al crear Producto");
-      console.error(error);
+      console.log(error)
+      dispatch(showNotification({
+        message: `Error al crear producto: ` + error.data.error,
+        severity: "warning"
+      }))
     }
   };
 
   // Función para manejar la acción de editar
   const handleEdit = (row) => {
-    console.log("Editar producto:", row);
-    // Aquí puedes implementar lógica adicional, como abrir un modal para editar la cotización
+    //console.log("Editar producto:", row);
+    navigate(`/productos/editar/${row.id_producto}`, {
+      state: { refetch: true },
+    });
   };
-  const handleDeleteClick = (row) => {
-    setSelectedProduct(row);
-    setOpenAlert(true);
+
+  const handleBulkDelete = async () => {
+    try {
+      /* setDeleteLoading(true); */
+      await deleteProductos({ ids: selectedRows }).unwrap();
+      dispatch(
+        showNotification({
+          message: "Productos eliminados correctamente.",
+          severity: "success",
+        })
+      );
+      setSelectedRows([]);
+      refetch();
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: `Error al eliminar productos: ${error.error}`,
+          severity: "error",
+        })
+      );
+    } /* finally {
+        setDeleteLoading(false);
+      } */
   };
-  // Función para manejar la acción de eliminar
-  const handleDelete = async () => {
-    if (selectedProduct) {
-      try {
-        console.log("Eliminar producto:", selectedProduct);
-        await deleteProducto(selectedProduct.id_producto).unwrap();
-        setOpenAlert(false);
-        setSelectedProduct(null);
-      } catch (error) {
-        console.log("Error al eliminar Producto", error);
-      }
+  const handleOpenDelete = () => {
+    if (selectedRows.length > 0) {
+      setOpenAlert(true);
+    } else {
+      dispatch(
+        showNotification({
+          message: "Debe seleccionar al menos un producto.",
+          severity: "warning",
+        })
+      );
     }
   };
+  const rowsPerPageOptions = [5, 10, 25, 50];
+  const isAllLoading = isLoading || loadingCategorias || loadingEstados;
+
+  if (isAllLoading) return <LoaderComponent />;
+  if (isError) {
+    dispatch(
+      showNotification({
+        message: `Error al obtener productos: ${error.error}`,
+        severity: "error",
+      })
+    );
+  }
 
   return (
     <Box sx={{ padding: "2rem" }}>
+      <Header title="Productos" subtitle="Lista de Productos" />
       {/* Botón para agregar un nuevo producto */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Button
+          color="error"
+          variant="contained"
+          onClick={handleOpenDelete}
+          disabled={selectedRows.length === 0 || isDeleting}
+        >
+          {isDeleting ? "Eliminando..." : "Eliminar Seleccionados"}
+        </Button>
         <Button
           variant="contained"
           color="primary"
           startIcon={<Add />}
-          sx={{ textTransform: "none" /* , borderRadius: "10%" */ }}
+          sx={{ textTransform: "none" }}
           onClick={() => setOpen(true)}
         >
           Nuevo Producto
@@ -222,26 +282,44 @@ const Productos = () => {
         }}
       >
         <DataGrid
+          loading={isLoading || !data?.productos}
           getRowId={(row) => row.id_producto}
           rows={rows}
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5, 10, 20]}
-          loading={isLoading || !data}
-          disableSelectionOnClick
+          paginationMode="server"
+          rowCount={paginacion?.totalItems || rows.length}
+          paginationModel={{
+            pageSize: pageSize,
+            page: page,
+          }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page);
+            setPageSize(model.pageSize);
+          }}
+          pagination
           checkboxSelection
           onRowSelectionModelChange={(ids) => setSelectedRows(ids)}
+          pageSizeOptions={rowsPerPageOptions}
+          sx={{
+            color: "black",
+            fontWeight: 400,
+            fontSize: "1rem",
+          }}
+          slots={{
+            toolbar: DataGridCustomToolbar,
+            pagination: CustomPagination,
+          }}
+          slotProps={{
+            toolbar: { searchInput, setSearchInput, setSearch },
+          }}
         />
       </Box>
       <AlertDialog
         openAlert={openAlert}
         title="¿Eliminar Producto?"
-        onConfirm={handleDelete}
-        onCloseAlert={() => {
-          setOpenAlert(false);
-          setSelectedProduct(null);
-        }}
-        message="¿Estás seguro que desear eliminar este producto?"
+        onConfirm={handleBulkDelete}
+        onCloseAlert={() => setOpenAlert(false)}
+        message={`¿Está seguro de que desea eliminar los ${selectedRows.length} productos seleccionados?`}
       />
       <ModalForm
         open={open}

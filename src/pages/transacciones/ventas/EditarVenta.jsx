@@ -22,7 +22,7 @@ import {
   useChangeDetallesInfoMutation,
   useAsignarTransaccionMutation,
   useEliminarAsignadoTransaccionMutation,
-  useChangeMetodoPagoMutation,
+ /*  useChangeMetodoPagoMutation, */
   useCompleteTransactionMutation,
   useFinalizarTransaccionMutation,
 } from "../../../services/ventasApi";
@@ -38,8 +38,8 @@ import PersonAddAlt1OutlinedIcon from "@mui/icons-material/PersonAddAlt1Outlined
 import AlertDialog from "../../../components/common/AlertDialog";
 import InfoFieldGroup from "../../../components/common/InfoFieldGroup";
 import DetallesTransaccion from "../../../components/venta/DetallesTransaccion";
-import { useRegistrarMetodoDePagoMutation } from "../../../services/pagosApi";
 import ModalForm from "../../../components/common/ModalForm";
+import BackButton from "../../../components/common/BackButton";
 
 const EditarVenta = () => {
   const { id } = useParams();
@@ -92,14 +92,12 @@ const EditarVenta = () => {
     useAsignarTransaccionMutation();
   const [removeChofer, { isLoading: isRemovingChofer }] =
     useEliminarAsignadoTransaccionMutation();
-  const [changeMetodoPago, { isLoading: isChangingMetodo }] =
-    useChangeMetodoPagoMutation();
+  //const [changeMetodoPago, { isLoading: isChangingMetodo }] =
+    //useChangeMetodoPagoMutation();
   const [completeTransaction, { isLoading: isCompleting }] =
     useCompleteTransactionMutation();
   const [finalizarTransaccion, { isLoading: isFinalizing }] =
     useFinalizarTransaccionMutation();
-  const [registrarMetodoPago, { isLoading: isRegisteringPago }] =
-    useRegistrarMetodoDePagoMutation();
 
   const isLoading =
     isLoadingTransaccion ||
@@ -119,7 +117,7 @@ const EditarVenta = () => {
 
   // Modal para eliminar
   const [openAlert, setOpenAlert] = useState(false);
-  const [/* deleteLoading */, setDeleteLoading] = useState(false);
+  const [, /* deleteLoading */ setDeleteLoading] = useState(false);
 
   // Modal para completar pago
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
@@ -353,7 +351,7 @@ const EditarVenta = () => {
     { value: 4, label: "Transferencia" },
   ];
 
-  const handlePago = async () => {
+  /* const handlePago = async () => {
     try {
       // Verificar si hay al menos un método de pago seleccionado
       const selectedPago = formData.pagos[0]; // Usar el primer pago para determinar el método
@@ -397,13 +395,13 @@ const EditarVenta = () => {
         })
       );
     }
-  };
+  }; */
 
-  const handleMetodoPagoChange = (e) => {
+  /* const handleMetodoPagoChange = (e) => {
     setSelectedMetodoPago(e.target.value);
-  };
+  }; */
 
-  const handleRegistrarMetodoPago = async () => {
+  /* const handleRegistrarMetodoPago = async () => {
     if (!selectedMetodoPago) {
       dispatch(
         showNotification({
@@ -438,10 +436,11 @@ const EditarVenta = () => {
         })
       );
     }
-  };
+  }; */
 
   const handleComplete = async (data) => {
     try {
+      console.log(data.metodo_pago)
       await completeTransaction({
         id,
         updates: {
@@ -498,26 +497,35 @@ const EditarVenta = () => {
 
   return (
     <Box m={1.5}>
+      <BackButton to="/ventas" label="Atrás"/>
       <Typography variant="h4" gutterBottom fontWeight="bold" mb={3}>
         Editar Venta
       </Typography>
       <Box display="flex" justifyContent="center" gap={2} mb={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleOpenPaymentModal}
-          disabled={isCompleting}
-        >
-          {isCompleting ? "Completando..." : "Completar Transacción"}
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleFinalizar}
-          disabled={isFinalizing}
-        >
-          {isFinalizing ? "Finalizando..." : "Finalizar Transacción"}
-        </Button>
+        {formData.estado?.nombre_estado === "Completada" ? (
+          <></>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenPaymentModal}
+            disabled={isCompleting}
+          >
+            {isCompleting ? "Completando..." : "Realizar Pago"}
+          </Button>
+        )}
+        {formData.estado?.nombre_estado === "Completada" ? (
+          <></>
+        ) : (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleFinalizar}
+            disabled={isFinalizing}
+          >
+            {isFinalizing ? "Finalizando..." : "Finalizar Transacción"}
+          </Button>
+        )}
       </Box>
       <Box>
         <Grid2 container spacing={3} display="flex" justifyContent="center">
@@ -663,7 +671,7 @@ const EditarVenta = () => {
             />
           </Grid2>
 
-          <Grid2 xs={12} md={4} sm={6} width={"30%"}>
+          {/* <Grid2 xs={12} md={4} sm={6} width={"30%"}>
             <Typography variant="h5" gutterBottom fontWeight="bold" mb={2}>
               {formData.pagos.length > 0
                 ? "Información de Pago"
@@ -715,6 +723,7 @@ const EditarVenta = () => {
                         onChange: handleMetodoPagoLocalChange, // Manejo local del cambio
                         name: `metodo_pago_${index}`,
                         options: paymentMethods,
+                        disabled: formData.estado?.nombre_estado === "Completada" ? true:false
                       },
                       {
                         label: "Estado del Pago",
@@ -764,7 +773,7 @@ const EditarVenta = () => {
                 </Button>
               </>
             )}
-          </Grid2>
+          </Grid2> */}
 
           {/*  Chofer Asignado */}
           <Grid2 xs={12} md={4} sm={6}>
@@ -860,7 +869,7 @@ const EditarVenta = () => {
       {/* Detalles de Productos */}
       <DetallesTransaccion
         detallesIniciales={formData.detalles}
-        productos={productos || []}
+        productos={productos?.productos || []}
         onDetallesChange={(updatedDetalles) => {
           setFormData((prev) => ({
             ...prev,
@@ -874,13 +883,6 @@ const EditarVenta = () => {
       {/* Botones de Acción */}
       <Box mt={3} display="flex" gap={2} pb={1}>
         <Button
-          variant="outlined"
-          color="inherit"
-          onClick={() => navigate("/ventas")}
-        >
-          Cancelar
-        </Button>
-        <Button
           variant="contained"
           color="primary"
           onClick={() => handleAction("changeEstado")}
@@ -889,25 +891,18 @@ const EditarVenta = () => {
         </Button>
         <Button
           variant="contained"
-          color="secondary"
-          onClick={() => handleAction("changeTipo")}
-        >
-          Cambiar Tipo
-        </Button>
-        <Button
-          variant="contained"
           color="success"
           onClick={() => handleAction("actualizarDetalles")}
         >
           Actualizar Detalles
         </Button>
-        <Button
+        {/* <Button
           variant="contained"
           color="info"
           onClick={handlePago} // Simplemente llama a la función
         >
           {isChangingMetodo ? "Actualizando..." : "Cambiar Método de Pago"}
-        </Button>
+        </Button> */}
       </Box>
       <AssignModal
         open={openAssignModal}
@@ -929,18 +924,21 @@ const EditarVenta = () => {
         title="Registrar Pago"
         fields={[
           {
-            type: "text",
-            label: "Método de Pago Actual",
+            type: "select",
+            label: "Método de Pago",
             name: "metodo_pago",
-            defaultValue: paymentData.metodo_pago,
-            disabled: true,
+            options: paymentMethods.map((method) => ({
+              value: method.label,
+              label: method.label,
+            })),
+            value: selectedMetodoPago,
+            onChange: (e) => setSelectedMetodoPago(e.target.value),
           },
           {
             type: "number",
             label: "Monto",
             name: "monto",
             defaultValue: paymentData.monto || "",
-
           },
           {
             type: "text",

@@ -26,6 +26,7 @@ import { showNotification } from "../../../state/reducers/notificacionSlice";
 import { API_URL } from "../../../services/apiBase";
 import AlertDialog from "../../../components/common/AlertDialog";
 import DetallesTransaccion from "../../../components/venta/DetallesTransaccion";
+import BackButton from "../../../components/common/BackButton";
 
 const EditarCotizacion = () => {
   const { id } = useParams();
@@ -245,6 +246,7 @@ const EditarCotizacion = () => {
   }
   return (
     <Box m={3}>
+      <BackButton to="/cotizaciones" label="Atrás"/>
       <Typography variant="h4" gutterBottom>
         Editar Cotización
       </Typography>
@@ -417,7 +419,7 @@ const EditarCotizacion = () => {
       {/* Detalles de Productos */}
       <DetallesTransaccion
         detallesIniciales={formData.detalles}
-        productos={productos || []}
+        productos={productos?.productos || []}
         onDetallesChange={(updatedDetalles) => {
           setFormData((prev) => ({
             ...prev,

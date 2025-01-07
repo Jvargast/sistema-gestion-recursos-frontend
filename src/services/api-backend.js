@@ -17,6 +17,12 @@ import permisosApi from "./permisosRolesApi";
 import logTransaccionesApi from "./logTransaccionesApi";
 import auditLogsApi from "./auditLogsApi";
 import { empresaApi } from "./empresaApi";
+import inventarioCamionsApi from "./inventarioCamionApi";
+import { entregasApi } from "./entregasApi";
+import camionesApi from "./camionesApi";
+import agendaApi from "./agendaApi";
+import { analisisProductosApi } from "./analisisProductosApi";
+import ventasChoferApi from "./ventasChoferApi";
 
 //import { ventasApi } from "./ventasApi";
 //import { proveedoresApi } from "./proveedoresApi";
@@ -40,6 +46,12 @@ export const apiMiddleware = [
   logTransaccionesApi.middleware,
   auditLogsApi.middleware,
   empresaApi.middleware,
+  inventarioCamionsApi.middleware,
+  entregasApi.middleware,
+  camionesApi.middleware,
+  agendaApi.middleware,
+  analisisProductosApi.middleware,
+  ventasChoferApi.middleware,
   /*ventasApi.middleware,
   proveedoresApi.middleware, */
 ];
@@ -63,6 +75,12 @@ export const apiReducers = {
   [logTransaccionesApi.reducerPath]: logTransaccionesApi.reducer,
   [auditLogsApi.reducerPath]: auditLogsApi.reducer,
   [empresaApi.reducerPath]: empresaApi.reducer,
+  [inventarioCamionsApi.reducerPath]: inventarioCamionsApi.reducer,
+  [entregasApi.reducerPath]: entregasApi.reducer,
+  [camionesApi.reducerPath]: camionesApi.reducer,
+  [agendaApi.reducerPath]: agendaApi.reducer,
+  [analisisProductosApi.reducerPath]: analisisProductosApi.reducer,
+  [ventasChoferApi.reducerPath]: ventasChoferApi.reducer,
   /*[ventasApi.reducerPath]: ventasApi.reducer,
   [proveedoresApi.reducerPath]: proveedoresApi.reducer, */
 };
@@ -85,7 +103,13 @@ const apiServices = {
   permisosApi,
   logTransaccionesApi,
   auditLogsApi,
-  empresaApi
+  empresaApi,
+  inventarioCamionsApi,
+  entregasApi,
+  camionesApi,
+  agendaApi,
+  analisisProductosApi,
+  ventasChoferApi
   /*ventasApi,
   proveedoresApi, */
 };

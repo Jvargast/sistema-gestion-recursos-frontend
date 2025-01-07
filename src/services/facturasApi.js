@@ -99,7 +99,7 @@ export const facturasApi = createApi({
         try {
           await queryFulfilled;
         } catch (error) {
-          console.log("Error al borrar pagos: ", error);
+          console.log("Error al borrar facturas: ", error);
         }
       },
     }),

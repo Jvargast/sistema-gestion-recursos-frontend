@@ -24,6 +24,18 @@ export const clientesApi = createApi({
       },
     }),
 
+    getPorcentajeClientesNuevos: builder.query({
+      query: () => `/clientes/nuevos/porcentaje`,
+      providesTags: ["Cliente"], // Cache de clientes
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.error("Error al obtener cliente por ID:", error);
+        }
+      },
+    }),
+
     // Obtener todos los clientes
     getAllClientes: builder.query({
       query: (params) => ({ url: `/clientes/`, params }),
@@ -136,6 +148,7 @@ export const {
   useDeleteClientesMutation,
   useDeactivateClienteMutation,
   useReactivateClienteMutation,
+  useGetPorcentajeClientesNuevosQuery
 } = clientesApi;
 
 export default clientesApi;

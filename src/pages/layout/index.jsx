@@ -10,7 +10,7 @@ const Layout = () => {
   const isNonMobile = useMediaQuery("(min-width: 600px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const user = useSelector((state) => state.auth.user);
+  const {user, rol} = useSelector((state) => state.auth);
   /* if (isLoading) return <div>Cargando usuario...</div>;
   if (isError) return <div>Error al cargar datos del usuario</div>; */
   if (!user) {
@@ -21,6 +21,7 @@ const Layout = () => {
     <Box display={isNonMobile ? "flex" : "block"} width="100%" height="100%">
       <Sidebar
         user={user || {}}
+        rol={rol || ""}
         isNonMobile={isNonMobile}
         drawerWidth="250px"
         isSidebarOpen={isSidebarOpen}
@@ -29,6 +30,7 @@ const Layout = () => {
       <Box flexGrow={1}>
         <Navbar
           user={user || {}}
+          rol={rol || ""}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />

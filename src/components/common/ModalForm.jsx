@@ -176,7 +176,7 @@ const ModalForm = ({ open, onClose, onSubmit, fields, title }) => {
         })}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="info">
           Cancelar
         </Button>
         <Button onClick={handleSubmit} color="primary" variant="contained">

@@ -29,7 +29,7 @@ export const usuariosApi = createApi({
       providesTags: ["User"], // Cache para invalidar al crear o actualizar usuarios
       transformResponse: (response) => ({
         usuarios: response.data, // El array de usuarios
-        paginacion: response.total,   // Datos de paginación
+        paginacion: response.total, // Datos de paginación
       }),
       async onQueryStarted(args, { queryFulfilled }) {
         try {
@@ -78,6 +78,23 @@ export const usuariosApi = createApi({
         }
       },
     }),
+    updateUserPassword: builder.mutation({
+      query: ({ rut, newPassword }) => ({
+        url: `/usuarios/${rut}/change-password`,
+        method: "PUT",
+        body: { newPassword },
+      }),
+      invalidatesTags: ["User"], // Invalida el caché del usuario
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          console.log("Contraseña actualizada correctamente.");
+        } catch (error) {
+          console.error("Error al actualizar la contraseña:", error);
+        }
+      },
+    }),
+    
     // Dar de baja un usuario
     deleteUser: builder.mutation({
       query: (rut) => ({
@@ -94,6 +111,42 @@ export const usuariosApi = createApi({
         }
       },
     }),
+    getOwnProfile: builder.query({
+      query: () => "/usuarios/mi-perfil",
+      providesTags: ["User"], // Cache de usuario
+    }),
+    changePassword: builder.mutation({
+      query: (updates) => ({
+        url: `/usuarios/change-password`,
+        method: "POST",
+        body: updates,
+      }),
+      invalidatesTags: ["User"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          console.log("Perfil actualizado correctamente");
+        } catch (error) {
+          console.error("Error al actualizar el perfil:", error);
+        }
+      },
+    }),
+    updateMyProfile: builder.mutation({
+      query: (updates) => ({
+        url: `/usuarios/mi-perfil`,
+        method: "PUT",
+        body: updates,
+      }),
+      invalidatesTags: ["User"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          console.log("Perfil actualizado correctamente");
+        } catch (error) {
+          console.error("Error al actualizar el perfil:", error);
+        }
+      },
+    }),
   }),
 });
 
@@ -105,5 +158,9 @@ export const {
   useUpdateUserMutation,
   useDeleteUserMutation,
   useGetAllChoferesQuery,
+  useUpdateMyProfileMutation,
+  useGetOwnProfileQuery,
+  useChangePasswordMutation,
+  useUpdateUserPasswordMutation
 } = usuariosApi;
 export default usuariosApi;

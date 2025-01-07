@@ -44,31 +44,31 @@ const EditarPago = () => {
   // Estado del formulario
   const [selectedAction, setSelectedAction] = useState("");
   const [formData, setFormData] = useState({
+    id_pago: "",
     monto: "",
     referencia: "",
     id_metodo_pago: "",
-    id_pago: "",
-    fecha_pago: "",
-    estado: {},
     metodo: {},
-    transaccionPago: {},
-    cliente: {},
+    fecha: "",
+    documento: {},
+    transaccion: {},
     usuario: {},
+    cliente: {},
   });
 
   useEffect(() => {
     if (pagoData) {
       setFormData({
+        id_pago: pagoData?.pago?.id_pago || "",
         monto: pagoData?.pago?.monto || "",
         referencia: pagoData?.pago?.referencia || "",
-        id_metodo_pago: pagoData?.pago?.id_metodo_pago || "",
-        id_pago: pagoData?.pago?.id_pago || "",
-        fecha_pago: pagoData?.pago?.fecha_pago || "",
-        estado: pagoData?.pago?.metodo || {},
-        metodo: pagoData?.pago?.estado || {},
-        transaccionPago: pagoData?.pago?.transaccionPago || {},
-        cliente: pagoData?.pago?.transaccionPago.cliente || {},
-        usuario: pagoData?.pago?.transaccionPago.usuario || {},
+        id_metodo_pago: pagoData?.pago.id_metodo_pago || "",
+        metodo: pagoData?.pago?.metodo || {},
+        fecha: pagoData?.pago?.fecha || "",
+        documento: pagoData?.pago?.documento || {},
+        transaccion: pagoData?.pago?.documento?.transaccion || {},
+        usuario: pagoData?.pago?.documento?.transaccion?.usuario || {},
+        cliente: pagoData?.pago?.documento?.cliente || {},
       });
     }
   }, [pagoData]);
@@ -193,7 +193,7 @@ const EditarPago = () => {
                 handleUpdatePago(
                   formData.monto,
                   formData.referencia,
-                  formData.transaccionPago?.id_transaccion
+                  formData.transaccion?.id_transaccion
                 );
                 break;
               case "generarRecibo":
@@ -260,20 +260,20 @@ const EditarPago = () => {
             <InfoFieldGroup
               fields={[
                 {
-                  label: "Estado",
-                  value: formData.estado?.nombre || "Desconocido",
+                  label: "Estado de Pago",
+                  value:
+                    formData.documento?.estadoPago?.nombre || "Desconocido",
                   disabled: true,
                 },
                 {
                   label: "Método de Pago",
-                  value: formData.metodo?.nombre || "Desconocido",
+                  value: formData.metodo?.nombre || "No especificado",
                   disabled: true,
                 },
                 {
-                  type: "date",
                   label: "Fecha de Pago",
-                  value: formData.fecha_pago
-                    ? format(new Date(formData.fecha_pago), "yyyy-MM-dd", {
+                  value: formData.fecha
+                    ? format(new Date(formData.fecha), "dd-MM-yyyy", {
                         locale: es,
                       })
                     : "No especificada",
@@ -299,7 +299,7 @@ const EditarPago = () => {
           </Typography>
           <NavigationButton
             label="Ver Cliente"
-            route={`/clientes/ver/${formData.cliente?.rut}`}
+            route={`/clientes/ver/${formData?.cliente?.rut}`}
           />
         </Box>
         <Grid2 container spacing={2}>
@@ -308,23 +308,22 @@ const EditarPago = () => {
               fields={[
                 {
                   label: "RUT",
-                  value: formData.cliente?.rut || "No especificado",
+                  value: formData?.cliente?.rut || "No especificado",
                   disabled: true,
                 },
                 {
-                  label: "Cliente / Empresa",
-                  value: formData.cliente?.tipo_cliente || "No especificado",
+                  label: "Nombre",
+                  value: formData?.cliente?.nombre || "No especificado",
                   disabled: true,
                 },
                 {
                   label: "Razón Social",
                   value: formData.cliente?.razon_social || "No especificada",
                   disabled: true,
-                  hidden: !formData.cliente?.razon_social,
                 },
                 {
-                  label: "Nombre",
-                  value: formData.cliente?.nombre || "No especificado",
+                  label: "Tipo de Cliente",
+                  value: formData?.cliente?.tipo_cliente || "No especificado",
                   disabled: true,
                 },
               ]}
@@ -334,23 +333,18 @@ const EditarPago = () => {
             <InfoFieldGroup
               fields={[
                 {
-                  label: "Apellido",
-                  value: formData.cliente?.apellido || "No especificado",
-                  disabled: true,
-                },
-                {
                   label: "Dirección",
-                  value: formData.cliente?.direccion || "No especificada",
+                  value: formData?.cliente?.direccion || "No especificada",
                   disabled: true,
                 },
                 {
                   label: "Teléfono",
-                  value: formData.cliente?.telefono || "No especificado",
+                  value: formData?.cliente?.telefono || "No especificado",
                   disabled: true,
                 },
                 {
                   label: "Email",
-                  value: formData.cliente?.email || "No especificado",
+                  value: formData?.cliente?.email || "No especificado",
                   disabled: true,
                 },
               ]}
@@ -371,12 +365,12 @@ const EditarPago = () => {
             Información de la Transacción
           </Typography>
           <NavigationButton
-            label={`Ver ${formData.transaccionPago.tipo_transaccion}`}
+            label={`Ver ${formData?.transaccion?.tipo_transaccion}`}
             route={`/${
-              formData.transaccionPago.tipo_transaccion === "cotizacion"
+              formData?.transaccion?.tipo_transaccion === "cotizacion"
                 ? "cotizaciones"
-                : `${formData.transaccionPago.tipo_transaccion}s`
-            }/editar/${formData.transaccionPago?.id_transaccion}`}
+                : `${formData?.transaccion?.tipo_transaccion}s`
+            }/editar/${formData?.transaccion?.id_transaccion}`}
           />
         </Box>
         <Grid2 container spacing={2}>
@@ -384,15 +378,21 @@ const EditarPago = () => {
             <InfoFieldGroup
               fields={[
                 {
-                  label: "Tipo de Transacción",
+                  label: "Id Transacción",
                   value:
-                    formData.transaccionPago?.tipo_transaccion ||
-                    "No especificada",
+                    formData?.transaccion?.id_transaccion || "No especificado",
                   disabled: true,
                 },
                 {
-                  label: "Total",
-                  value: `$${formData.transaccionPago?.total || 0}`,
+                  label: "Tipo de Transacción",
+                  value:
+                    formData?.transaccion?.tipo_transaccion ||
+                    "No especificado",
+                  disabled: true,
+                },
+                {
+                  label: "Total Transacción",
+                  value: `$${formData?.transaccion?.total || 0}`,
                   disabled: true,
                 },
               ]}
@@ -404,19 +404,16 @@ const EditarPago = () => {
                 {
                   label: "Observaciones",
                   value:
-                    formData.transaccionPago?.observaciones ||
-                    "No especificadas",
+                    formData?.transaccion?.observaciones || "No especificadas",
                   disabled: true,
                 },
                 {
                   label: "Fecha de Creación",
-                  value: formData.transaccionPago?.fecha_creacion
+                  value: formData?.transaccion?.fecha_creacion
                     ? format(
-                        new Date(formData.transaccionPago?.fecha_creacion),
-                        "yyyy-MM-dd",
-                        {
-                          locale: es,
-                        }
+                        new Date(formData?.transaccion?.fecha_creacion),
+                        "dd-MM-yyyy",
+                        { locale: es }
                       )
                     : "No especificada",
                   disabled: true,
@@ -450,12 +447,12 @@ const EditarPago = () => {
               fields={[
                 {
                   label: "Nombre",
-                  value: formData.usuario?.nombre || "No especificado",
+                  value: formData?.usuario?.nombre || "No especificado",
                   disabled: true,
                 },
                 {
                   label: "Apellido",
-                  value: formData.usuario?.apellido || "No especificado",
+                  value: formData?.usuario?.apellido || "No especificado",
                   disabled: true,
                 },
               ]}
@@ -466,12 +463,12 @@ const EditarPago = () => {
               fields={[
                 {
                   label: "RUT",
-                  value: formData.usuario?.rut || "No especificado",
+                  value: formData?.usuario?.rut || "No especificado",
                   disabled: true,
                 },
                 {
-                  label: "Rol",
-                  value: formData.usuario?.rol?.nombre || "No especificado",
+                  label: "Email",
+                  value: formData?.usuario?.email || "No especificado",
                   disabled: true,
                 },
               ]}

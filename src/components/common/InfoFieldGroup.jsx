@@ -27,6 +27,7 @@ const InfoFieldGroup = ({ fields = [] }) => {
                   label={label}
                   name={name}
                   sx={{ fontSize: "1rem" }}
+                  disabled={disabled}
                 >
                   {options.map((option, idx) => (
                     <MenuItem key={idx} value={option.value}>

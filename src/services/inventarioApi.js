@@ -16,9 +16,32 @@ export const inventarioApi = createApi({
         params
       }),
       providesTags: ["Producto"],
+      transformResponse: (response) => ({
+        productos: response.data, 
+        paginacion: response.total,   
+      }),
       async onQueryStarted(args, {queryFulfilled}) {
         try {
-            const {data} = await queryFulfilled;
+            await queryFulfilled;
+        } catch (error) {
+            console.log("Error al obtener la lista de productos", error)
+        }
+      }
+    }),
+
+    getInventario: builder.query({
+      query: (params) => ({
+        url: `/disponible`,
+        params
+      }),
+      providesTags: ["Producto"],
+      transformResponse: (response) => ({
+        productos: response.data, 
+        paginacion: response.total,   
+      }),
+      async onQueryStarted(args, {queryFulfilled}) {
+        try {
+            await queryFulfilled;
         } catch (error) {
             console.log("Error al obtener la lista de productos", error)
         }
@@ -49,7 +72,7 @@ export const inventarioApi = createApi({
 
     // Actualizar un producto existente
     updateProducto: builder.mutation({
-      query: ({ id, updatedProducto }) => ({
+      query: ({ id, ...updatedProducto }) => ({
         url: `/${id}`,
         method: "PUT",
         body: updatedProducto,
@@ -65,17 +88,35 @@ export const inventarioApi = createApi({
       }),
       invalidatesTags: ["Producto"], // Invalidar caché de productos
     }),
+
+    deleteProductos: builder.mutation({
+      query: ({ids}) => ({
+        url: `/`,
+        method: "PATCH",
+        body: {ids}
+      }),
+      invalidatesTags: ["Producto"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          console.log("Error al borrar Productos: ", error);
+        }
+      }, 
+    })
   }),
 });
 
 // Exportar hooks generados automáticamente
 export const {
   useGetAllProductosQuery,
+  useGetInventarioQuery,
   useGetProductoByIdQuery,
   useGetProductosByTipoQuery,
   useCreateProductoMutation,
   useUpdateProductoMutation,
   useDeleteProductoMutation,
+  useDeleteProductosMutation
 } = inventarioApi;
 
 export default inventarioApi;

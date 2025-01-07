@@ -4,8 +4,16 @@ import LoaderComponent from "../common/LoaderComponent";
 import { useSelector } from "react-redux";
 const ProtectedRoute = () => {
   const location = useLocation();
-  const {isAuthenticated} = useSelector((state) => state.auth);
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+  const { isAuthenticated, syncCompleted } = useSelector((state) => state.auth);
+  if (!syncCompleted) {
+    // Puedes mostrar un loader mientras se completa la sincronización
+    return <LoaderComponent />;
+  }
+  return isAuthenticated ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/login" state={{ from: location }} replace />
+  );
 };
 
 export default ProtectedRoute;

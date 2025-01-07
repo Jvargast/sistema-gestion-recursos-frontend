@@ -25,6 +25,8 @@ const Facturas = () => {
   const [openAlert, setOpenAlert] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   const [deleteFacturas, { isLoading: isDeleting }] =
     useDeleteFacturasMutation();
@@ -37,6 +39,7 @@ const Facturas = () => {
     estado: "Cancelada",
     page: page + 1,
     limit: pageSize,
+    search: search,
   });
   const [selectedRows, setSelectedRows] = useState([]);
   const navigate = useNavigate();
@@ -50,19 +53,31 @@ const Facturas = () => {
     ? facturas?.facturas?.map((factura) => ({
         id: factura.id_factura,
         numero: factura.numero_factura,
-        clienteNombre: factura.transaccion?.cliente?.nombre,
-        observaciones: factura.observaciones,
-        fecha: factura.fecha_emision,
-        total: factura.total,
-        estadoNombre: factura.estado?.nombre,
+        tipoFactura: factura.tipo_factura,
+        preciosOpcion: factura.precios_opcion,
+        formaPago: factura.forma_pago,
+        clienteNombre: factura.documento?.cliente?.nombre,
+        clienteEmail: factura.documento?.cliente?.email,
+        clienteRut: factura.documento?.cliente?.rut,
+        tipoDocumento: factura.documento?.tipo_documento,
+        total: factura.documento?.total,
+        fechaEmision: factura.documento?.fecha_emision,
+        estadoPago: factura.documento?.estadoPago?.nombre,
+        estadoPagoDescripcion: factura.documento?.estadoPago?.descripcion,
         sequentialId: factura.sequentialId,
       }))
     : [];
 
   // Columnas del DataGrid
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.25, resizable: false },
+    { field: "sequentialId", headerName: "ID", flex: 0.25, resizable: false },
     { field: "numero", headerName: "Número", flex: 0.35, resizable: false },
+    {
+      field: "formaPago",
+      headerName: "Forma Pago",
+      flex: 0.3,
+      resizable: false,
+    },
     {
       field: "clienteNombre",
       headerName: "Cliente",
@@ -70,17 +85,11 @@ const Facturas = () => {
       resizable: false,
     },
     {
-      field: "observaciones",
-      headerName: "Observaciones",
-      flex: 0.5,
-      resizable: false,
-    },
-    {
-      field: "fecha",
+      field: "fechaEmision",
       headerName: "Fecha Emisión",
-      flex: 0.6,
+      flex: 0.5,
       renderCell: (params) => {
-        return format(new Date(params.value), "dd 'de' MMMM 'de' yyyy, HH:mm", {
+        return format(new Date(params.value), "dd-MM-yyyy, HH:mm", {
           locale: es,
         });
       },
@@ -95,7 +104,7 @@ const Facturas = () => {
       resizable: false,
     },
     {
-      field: "estadoNombre",
+      field: "estadoPago",
       headerName: "Estado",
       flex: 0.4,
       resizable: false,
@@ -103,7 +112,7 @@ const Facturas = () => {
     {
       field: "acciones",
       headerName: "Acciones",
-      flex: 0.5,
+      flex: 0.3,
       sortable: false,
       resizable: false,
       renderCell: (params) => (
@@ -129,7 +138,7 @@ const Facturas = () => {
       await deleteFacturas({ ids: selectedRows }).unwrap();
       dispatch(
         showNotification({
-          message: "Ventas eliminadss correctamente.",
+          message: "Ventas eliminadas correctamente.",
           severity: "success",
         })
       );
@@ -170,7 +179,7 @@ const Facturas = () => {
   return (
     <Box
       sx={{
-        backgroundColor: theme.palette.background.default,
+        /* backgroundColor: theme.palette.grey[100], */
         padding: "1rem", // Añadimos un padding global para evitar desbordes
         overflow: "hidden", // Para evitar barras de desplazamiento innecesarias
       }}
@@ -195,12 +204,17 @@ const Facturas = () => {
       </Box>
 
       {/* Tabla */}
-      <Paper elevation={3} sx={{ padding: "1rem" }}>
+      <Paper elevation={3} sx={{ padding: "0.7rem" }}>
         <Box
           height="70vh"
           sx={{
             maxWidth: "100%",
             overflowX: "auto",
+            "&::-webkit-scrollbar": {
+              display: "none", // Oculta la barra en navegadores basados en Webkit
+            },
+            "msOverflowStyle": "none", // Oculta la barra en IE y Edge heredado
+            "scrollbarWidth": "none",
             "& .MuiDataGrid-root": {
               border: "none",
             },
@@ -208,23 +222,17 @@ const Facturas = () => {
               borderBottom: "none",
             },
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[50],
-              borderBottom: "none",
-              fontWeight: 600,
+              backgroundColor: theme.palette.primary[400], // Ajusta el color de fondo del encabezado
+              color: theme.palette.background.alt, // Ajusta el color del texto
+              fontWeight: "bold", // Asegúrate de que el texto sea destacado
+              borderBottom: "1px solid", // Añade un borde si es necesario
               fontSize: "1.2rem",
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: theme.palette.secondary[1000],
             },
             "& .MuiDataGrid-footerContainer": {
               backgroundColor: theme.palette.grey[300],
               color: theme.palette.secondary[100],
               borderTop: "none",
             },
-            /* "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.secondary[200]} !important`,
-            }, */
           }}
         >
           <Button
@@ -265,6 +273,9 @@ const Facturas = () => {
             slots={{
               toolbar: DataGridCustomToolbar,
               pagination: CustomPagination,
+            }}
+            slotProps={{
+              toolbar: { searchInput, setSearchInput, setSearch },
             }}
           />
         </Box>

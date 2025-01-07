@@ -6,14 +6,19 @@ import {
   Drawer,
   IconButton,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
   useTheme,
+  Collapse,
 } from "@mui/material";
+import EventIcon from "@mui/icons-material/Event";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import {
   SettingsOutlined,
   ChevronLeft,
@@ -22,17 +27,20 @@ import {
   ShoppingCartOutlined,
   Groups2Outlined,
   ReceiptLongOutlined,
-  PublicOutlined,
+/*   PublicOutlined, */
   PointOfSaleOutlined,
-  TodayOutlined,
-  CalendarMonthOutlined,
+/*   TodayOutlined,
+  CalendarMonthOutlined, */
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
   WarehouseOutlined,
-  PeopleAltOutlined,
-  ChatOutlined,
+/*   PeopleAltOutlined,
+  ChatOutlined, */
   PersonOutline,
+  CategoryOutlined,
+  ExpandLess,
+  ExpandMore,
 } from "@mui/icons-material";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
@@ -41,104 +49,193 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FlexBetween from "./FlexBetween";
 import logoImage from "../../assets/images/logo_aguas_valentino2.png";
+import { useSelector } from "react-redux";
 
-const navItems = [
+export const modulesData = [
   {
-    text: "Dashboard",
+    // Este primer objeto puede ser un ítem "sueltito"
+    name: "Dashboard",
     icon: <HomeOutlined />,
+    path: "dashboard",
+    permission: "ver_dashboard",
+    children: null, // sin hijos
   },
   {
-    text: "Módulo Ventas",
-    icon: null,
+    name: "Modulo Ventas",
+    icon: null, // en caso de que quieras un ícono genérico, ponlo aquí
+    permission: "ver_ventas",
+    children: [
+      {
+        text: "Facturas",
+        icon: <ReceiptLongOutlined />,
+        path: "facturas",
+        permission: "ver_facturas",
+      },
+      {
+        text: "Pagos",
+        icon: <PaymentOutlinedIcon />,
+        path: "pagos",
+        permission: "ver_pagos",
+      },
+      {
+        text: "Cotizaciones",
+        icon: <RequestQuoteOutlinedIcon />,
+        path: "cotizaciones",
+        permission: "ver_cotizaciones",
+      },
+      {
+        text: "Pedidos",
+        icon: <ShoppingCartOutlined />,
+        path: "pedidos",
+        permission: "ver_pedidos",
+      },
+      {
+        text: "Ventas",
+        icon: <PointOfSaleOutlined />,
+        path: "ventas",
+        permission: "ver_ventas",
+      },
+      {
+        text: "Clientes",
+        icon: <Groups2Outlined />,
+        path: "clientes",
+        permission: "ver_clientes",
+      },
+    ],
   },
   {
-    text: "Facturas",
-    icon: <ReceiptLongOutlined />,
+    name: "Modulo Inventario",
+    permission: "ver_productos",
+    children: [
+      {
+        text: "Productos",
+        icon: <Inventory2OutlinedIcon />,
+        path: "productos",
+        permission: "ver_productos",
+      },
+      {
+        text: "Insumos",
+        icon: <WarehouseOutlined />,
+        path: "insumos",
+        permission: "ver_insumos",
+      },
+      {
+        text: "Categorias",
+        icon: <CategoryOutlined />,
+        path: "categorias",
+        permission: "ver_categorias",
+      },
+    ],
   },
   {
-    text: "Pagos",
-    icon: <PaymentOutlinedIcon />,
+    name: "Modulo Entregas",
+    permission: "ver_entregas",
+    children: [
+      {
+        text: "Ventas Chofer",
+        icon:<ReceiptOutlinedIcon/> ,
+        path: "ventas-chofer",
+        permission: "ver_ventas",
+      },
+      {
+        text: "Entregas Realizadas",
+        icon: <AssignmentTurnedInIcon />,
+        path: "entregas-completadas",
+        permission: "ver_entregas_realizadas",
+      },
+      {
+        text: "Asignadas",
+        icon: <AssignmentOutlinedIcon />,
+        path: "entregas",
+        permission: "ver_entregas_asignadas",
+      },
+      {
+        text: "Camiones",
+        icon: <LocalShippingOutlinedIcon />,
+        path: "camiones",
+        permission: "ver_camiones",
+      },
+      {
+        text: "Agenda Carga",
+        icon: <EventIcon />,
+        path: "agendas",
+        permission: "ver_agenda_carga",
+      },
+    ],
+  },
+  /* {
+    name: "Modulo Agenda",
+    children: [
+      {
+        text: "Camiones",
+        icon: <EventIcon/>,
+        path: "agendas",
+      },
+      {
+        text: ""
+      }
+    ]
+  }, */
+  /*   {
+    name: "Modulo Geografía",
+    children: [
+      {
+        text: "Geography",
+        icon: <PublicOutlined />,
+        path: "geography",
+      },
+    ],
+  }, */
+  /*   {
+    name: "Modulo Proveedores",
+    children: [
+      {
+        text: "Proveedores",
+        icon: <PeopleAltOutlined />,
+        path: "proveedores",
+      },
+      {
+        text: "Mensajes",
+        icon: <ChatOutlined />,
+        path: "mensajes",
+      },
+    ],
+  }, */
+  {
+    name: "Modulo Analytics",
+    permission: "ver_estadisticas",
+    children: [
+      {
+        text: "Estadisticas",
+        icon: <PieChartOutlined />,
+        path: "estadisticas",
+        permission: "ver_estadisticas",
+      },
+    ],
   },
   {
-    text: "Cotizaciones",
-    icon: <RequestQuoteOutlinedIcon />,
-  },
-  {
-    text: "Pedidos",
-    icon: <ShoppingCartOutlined />,
-  },
-  {
-    text: "Ventas",
-    icon: <PointOfSaleOutlined />,
-  },
-  {
-    text: "Clientes",
-    icon: <Groups2Outlined />,
-  },
-  {
-    text: "Módulo Inventario",
-    icon: null,
-  },
-  {
-    text: "Productos",
-    icon: <Inventory2OutlinedIcon />,
-  },
-  {
-    text: "Insumos",
-    icon: <WarehouseOutlined />,
-  },
-  {
-    text: "Módulo Geografía",
-    icon: null,
-  },
-  {
-    text: "Geography",
-    icon: <PublicOutlined />,
-  },
-  {
-    text: "Módulo Proveedores",
-    icon: null,
-  },
-  {
-    text: "Proveedores",
-    icon: <PeopleAltOutlined />,
-  },
-  {
-    text: "Mensajes",
-    icon: <ChatOutlined />,
-  },
-  {
-    text: "Módulo Análisis",
-    icon: null,
-  },
-  {
-    text: "Diario",
-    icon: <TodayOutlined />,
-  },
-  {
-    text: "Mensual",
-    icon: <CalendarMonthOutlined />,
-  },
-  {
-    text: "Estadísticas",
-    icon: <PieChartOutlined />,
-  },
-  {
-    text: "Gestión",
-    icon: null,
-  },
-  {
-    text: "Admin",
-    icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Rendimiento",
-    icon: <TrendingUpOutlined />,
+    name: "Gestion",
+    permission: "ver_admin",
+    children: [
+      {
+        text: "Admin",
+        icon: <AdminPanelSettingsOutlined />,
+        path: "admin",
+        permission: "ver_admin",
+      },
+      {
+        text: "Rendimiento",
+        icon: <TrendingUpOutlined />,
+        path: "rendimiento",
+        permission: "ver_rendimiento",
+      },
+    ],
   },
 ];
 
 const Sidebar = ({
   user,
+  rol,
   drawerWidth,
   isSidebarOpen,
   setIsSidebarOpen,
@@ -148,10 +245,30 @@ const Sidebar = ({
   const [active, setActive] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
+  const [openSections, setOpenSections] = useState({});
+  const permisos = useSelector((state) => state.auth.permisos);
 
   useEffect(() => {
     setActive(pathname.substring(1));
   }, [pathname]);
+
+  // Función para togglear secciones
+  const handleToggleSection = (moduleName) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [moduleName]: !prev[moduleName],
+    }));
+  };
+
+  const handleNavigate = (path) => {
+    navigate(`/${path}`);
+    setActive(path);
+  };
+
+  //const sidebarBgColor = getSidebarColor(user.rol?.nombre, theme);
+  const hasPermission = (permission) => {
+    return permisos.includes(permission);
+  };
 
   return (
     <Box component="nav">
@@ -168,10 +285,16 @@ const Sidebar = ({
                 theme.palette.mode === "dark"
                   ? theme.palette.primary[500]
                   : theme.palette.secondary[1000],
-              backgroundColor: theme.palette.background.alt,
+              backgroundColor: theme.palette.sidebar.main,
               boxSixing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
               width: drawerWidth,
+              overflowY: "scroll", // Permite scroll vertical
+              "&::-webkit-scrollbar": {
+                display: "none", // Oculta la barra en navegadores basados en Webkit (Chrome, Edge)
+              },
+              "msOverflowStyle": "none", // Oculta la barra en IE y Edge
+              "scrollbarWidth": "none",
             },
           }}
         >
@@ -201,91 +324,171 @@ const Sidebar = ({
               </Box>
             </Box>
             <List>
-              {navItems.map(({ text, icon }) => {
-                if (!icon) {
-                  return (
-                    <Typography key={text} sx={{ m: "2.25rem 0 1rem 3rem" }}>
-                      {text}
-                    </Typography>
-                  );
-                }
-                const lcText = text.toLowerCase();
-
-                return (
-                  <ListItem key={text} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        navigate(`/${lcText}`);
-                        setActive(lcText);
-                      }}
-                      sx={
-                        theme.palette.mode === "dark"
-                          ? {
-                              backgroundColor:
-                                active === lcText
-                                  ? theme.palette.primary[100]
-                                  : "transparent",
-                              color:
-                                active === lcText
+              {modulesData
+                .filter(
+                  (module) =>
+                    !module.permission || hasPermission(module.permission)
+                )
+                .map((module) => {
+                  // Si no tiene hijos, es un item directo
+                  if (!module.children) {
+                    return (
+                      <ListItemButton
+                        key={module.name}
+                        onClick={() => handleNavigate(module.path)}
+                        sx={{
+                          backgroundColor:
+                            active === module.path
+                              ? theme.palette.mode === "dark"
+                                ? theme.palette.primary[100]
+                                : theme.palette.primary[300]
+                              : "transparent",
+                          color:
+                            active === module.path
+                              ? theme.palette.mode === "dark"
+                                ? theme.palette.primary[900]
+                                : theme.palette.primary[100]
+                              : "inherit",
+                          "&:hover": {
+                            backgroundColor:
+                              active === module.path
+                                ? theme.palette.mode === "dark"
+                                  ? theme.palette.primary[100] // Mantén el fondo del activo
+                                  : theme.palette.primary[300]
+                                : theme.palette.mode === "dark"
+                                ? theme.palette.primary[200]
+                                : theme.palette.primary[300], // Cambia el color solo si no está activo
+                            color:
+                              active === module.path
+                                ? theme.palette.mode === "dark"
                                   ? theme.palette.primary[900]
-                                  : theme.palette.primary[500],
-                            }
-                          : {
-                              backgroundColor:
-                                active === lcText
-                                  ? theme.palette.secondary[900]
-                                  : "transparent",
-                              color:
-                                active === lcText
-                                  ? theme.palette.primary[100]
-                                  : theme.palette.secondary[1000],
-                            }
-                      }
-                    >
-                      <ListItemIcon
-                        sx={
-                          theme.palette.mode === "dark"
-                            ? {
-                                ml: "2rem",
-                                color:
-                                  active === lcText
-                                    ? theme.palette.primary[900]
-                                    : theme.palette.grey[1000],
-                              }
-                            : {
-                                ml: "2rem",
-                                color:
-                                  active === lcText
-                                    ? theme.palette.primary[100]
-                                    : theme.palette.secondary[1000],
-                              }
-                        }
+                                  : theme.palette.primary[50] // Mantén el color del texto del activo
+                                : theme.palette.mode === "dark"
+                                ? theme.palette.primary[900]
+                                : theme.palette.primary[50],
+                          },
+                        }}
                       >
-                        {icon}
-                      </ListItemIcon>
-                      <ListItemText primary={text} />
-                      {active === lcText && (
-                        <ChevronRightOutlined sx={{ ml: "auto" }} />
-                      )}
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
+                        {/* Icono si lo tiene */}
+                        {module.icon && (
+                          <ListItemIcon
+                            sx={{
+                              color:
+                                active === module.path
+                                  ? theme.palette.mode === "dark"
+                                    ? theme.palette.primary[900]
+                                    : theme.palette.primary[100]
+                                  : "inherit",
+                            }}
+                          >
+                            {module.icon}
+                          </ListItemIcon>
+                        )}
+                        <ListItemText primary={module.name} />
+                        {active === module.path && (
+                          <ChevronRightOutlined sx={{ ml: "auto" }} />
+                        )}
+                      </ListItemButton>
+                    );
+                  }
+
+                  // Si tiene hijos, es un "módulo" con subitems
+                  return (
+                    <Box key={module.name}>
+                      {/* Botón principal de la sección */}
+                      <ListItemButton
+                        onClick={() => handleToggleSection(module.name)}
+                        sx={{
+                          // style del botón del módulo
+                          color: "inherit",
+                        }}
+                      >
+                        {/* Icono si lo deseas */}
+                        {module.icon && (
+                          <ListItemIcon sx={{ color: "#ffffff" }}>
+                            {module.icon}
+                          </ListItemIcon>
+                        )}
+                        <ListItemText primary={module.name} />
+                        {/* Flechita de expandir/colapsar */}
+                        {openSections[module.name] ? (
+                          <ExpandLess />
+                        ) : (
+                          <ExpandMore />
+                        )}
+                      </ListItemButton>
+
+                      {/* Sublista colapsable */}
+                      <Collapse
+                        in={!!openSections[module.name]}
+                        timeout="auto"
+                        unmountOnExit
+                      >
+                        <List component="div" disablePadding>
+                          {module.children
+                            .filter((child) => hasPermission(child.permission))
+                            .map((child) => (
+                              <ListItemButton
+                                key={child.text}
+                                onClick={() => handleNavigate(child.path)}
+                                sx={{
+                                  pl: 4, // padding-left extra para "indentar"
+                                  backgroundColor:
+                                    active === child.path
+                                      ? theme.palette.mode === "dark"
+                                        ? theme.palette.primary[100]
+                                        : theme.palette.primary[300]
+                                      : "transparent",
+                                  color:
+                                    active === child.path
+                                      ? theme.palette.mode === "dark"
+                                        ? theme.palette.primary[100]
+                                        : theme.palette.primary[100]
+                                      : "inherit",
+                                  "&:hover": {
+                                    backgroundColor:
+                                      active === module.path
+                                        ? theme.palette.primary[500] // Mantiene el color si está activo
+                                        : theme.palette.grey[300], // Cambia solo para hover si no está activo
+                                    color:
+                                      active === module.path
+                                        ? theme.palette.primary[1000]
+                                        : theme.palette.primary[100], // Cambia color de texto para hover
+                                  },
+                                }}
+                              >
+                                {/* Icono del sub-item */}
+                                {child.icon && (
+                                  <ListItemIcon
+                                    sx={{
+                                      color:
+                                        active === child.path
+                                          ? theme.palette.mode === "dark"
+                                            ? theme.palette.primary[900]
+                                            : theme.palette.primary[100]
+                                          : "inherit",
+                                    }}
+                                  >
+                                    {child.icon}
+                                  </ListItemIcon>
+                                )}
+                                <ListItemText primary={child.text} />
+                                {active === child.path && (
+                                  <ChevronRightOutlined sx={{ ml: "auto" }} />
+                                )}
+                              </ListItemButton>
+                            ))}
+                        </List>
+                      </Collapse>
+                    </Box>
+                  );
+                })}
             </List>
           </Box>
 
           <Box /* position="absolute" */ bottom="2rem">
             <Divider />
             <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
-              {/* <Box
-                component="img"
-                alt="profile"
-                src={profileImage}
-                height="40px"
-                width="40px"
-                borderRadius="50%"
-                sx={{ objectFit: "cover" }}
-              /> */}
               <Box>
                 <AccountCircleIcon fontSize="large" />
               </Box>
@@ -300,7 +503,7 @@ const Sidebar = ({
                         : theme.palette.secondary[1000],
                   }}
                 >
-                  {user.nombre}
+                  {user?.nombre || ""}
                 </Typography>
                 <Typography
                   fontSize="0.8rem"
@@ -311,7 +514,7 @@ const Sidebar = ({
                         : theme.palette.secondary[1000],
                   }}
                 >
-                  {user.rol.nombre}
+                  {rol || ""}
                 </Typography>
               </Box>
               <SettingsOutlined

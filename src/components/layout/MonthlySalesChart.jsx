@@ -13,12 +13,14 @@ import { Box, Typography, useTheme } from "@mui/material";
 
 const MonthlySalesChart = ({ data }) => {
   const theme = useTheme();
+  // Asegurarse de que los datos estén presentes
+  const datosMensuales = data?.datos_mensuales || [];
 
   // Transformar los datos mensuales para el gráfico
-  const formattedData = data[0]?.datos_mensuales.map((item) => ({
+  const formattedData = datosMensuales.map((item) => ({
     mes: getMonthName(item.mes),
-    total: item.total, // Asegurarse de que el total sea un número
-    unidades: parseInt(item.unidades, 10), // Convertir unidades a número entero
+    total: parseFloat(item.total) || 0, // Asegurarse de que el total sea un número
+    unidades: parseInt(item.unidades, 10) || 0, // Convertir unidades a número entero
   }));
 
   // Función para obtener el nombre del mes
@@ -43,10 +45,9 @@ const MonthlySalesChart = ({ data }) => {
   return (
     <Box
       sx={{
-        backgroundColor: theme.palette.background.charts,
+        backgroundColor: theme.palette.background.default,
         borderRadius: "10px",
         p: "1rem",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
       }}
     >
       <Typography
@@ -54,7 +55,7 @@ const MonthlySalesChart = ({ data }) => {
         sx={{
           textAlign: "center",
           marginBottom: "1rem",
-          color: theme.palette.grey[900],
+          color: "#000000",
           fontSize: "3rem",
         }}
       >
@@ -65,29 +66,33 @@ const MonthlySalesChart = ({ data }) => {
           data={formattedData}
           margin={{ top: 10, right: 60, left: 50, bottom: 20 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#000000" />
           <XAxis
             dataKey="mes"
-            stroke={theme.palette.primary[100]}
+            stroke="#000000"
             tickMargin={10}
+            tick={{ fill: "#000000" }}
           />
           <YAxis
-            stroke={theme.palette.primary.charts}
+            stroke="#000000"
+            tick={{ fill: "#000000", fontSize: "1rem" }}
             domain={[0, "dataMax + 5000"]}
             tickFormatter={(value) => `$${value.toLocaleString()}`}
             allowDecimals={false}
             tickLine={false}
-            tick={{ fontSize: "1rem", fill: theme.palette.grey[900] }}
           />
           <Tooltip
-            contentStyle={{ color: theme.palette.primary.charts }}
+            contentStyle={{
+              backgroundColor: "#d82f2f",
+              color: "#000000",
+            }}
             formatter={(value) => `${value.toLocaleString()}`}
           />
           <Legend style={{ fontSize: "1rem" }} />
           <Line
             type="linear"
             dataKey="total"
-            stroke={theme.palette.primary.main}
+            stroke="#000000"
             strokeWidth={2}
             name="Ventas ($)"
           />

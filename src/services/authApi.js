@@ -24,13 +24,12 @@ export const authApi = createApi({
       query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
-        body: {...credentials},
+        body: { ...credentials },
       }),
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         dispatch(setLoading(true)); // Activa el estado de carga
         try {
-          const { data } = await queryFulfilled;
-          dispatch(setUser(data.usuario));
+          await queryFulfilled;
         } catch (error) {
           console.error("Error al iniciar sesión:", error);
         } finally {
@@ -43,7 +42,7 @@ export const authApi = createApi({
       async onQueryStarted(args, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setUser(data.usuario)); // Actualiza el usuario en el estado global
+          dispatch(setUser(data)); // Actualiza el usuario en el estado global
         } catch (error) {
           console.error("Error al obtener usuario autenticado:", error);
         }
