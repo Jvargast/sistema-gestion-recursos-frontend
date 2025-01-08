@@ -33,7 +33,6 @@ const authSlice = createSlice({
       state.isLoading = false; // Carga completada
       state.syncCompleted = true;
       Cookies.remove("authToken");
-      window.location.href = "/login";
     },
     setLoading: (state, action) => {
       state.isLoading = action.payload; // Actualiza el estado de carga
