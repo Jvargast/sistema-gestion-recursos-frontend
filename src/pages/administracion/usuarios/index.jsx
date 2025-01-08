@@ -109,6 +109,7 @@ const UserManagement = () => {
     { name: "rut", label: "RUT", type: "text", defaultValue: "" },
     { name: "nombre", label: "Nombre", type: "text", defaultValue: "" },
     { name: "apellido", label: "Apellido", type: "text", defaultValue: "" },
+    { name: "password", label: "Contraseña", type: "text", defaultValue: "" },
     { name: "email", label: "Email", type: "text", defaultValue: "" },
     {
       name: "rolId",

@@ -396,7 +396,7 @@ const EntregasManagement = () => {
 
                 {/* Botón para devolver los productos */}
                 {agenda.estado_camion === "Finalizado" &&
-                  camionCapacity?.capacidadUtilizada === 0 && (
+                  /* camionCapacity?.capacidadUtilizada === 0 && */ (
                     <Button
                       variant="contained"
                       color="secondary"

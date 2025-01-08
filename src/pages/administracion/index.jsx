@@ -11,7 +11,7 @@ import {
   SecurityOutlined,
   SupervisorAccountOutlined,
 } from "@mui/icons-material";
-import BusinessIcon from '@mui/icons-material/Business';
+import BusinessIcon from "@mui/icons-material/Business";
 import { useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -81,7 +81,16 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <Box className="p-4 bg-gray-50">
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "90vh",
+        backgroundColor: "gray.50",
+        p:1
+      }}
+    >
       <Grid2 container spacing={2} justifyContent="center" wrap="wrap">
         {navItems.map((item, index) => (
           <Grid2
@@ -97,7 +106,9 @@ const Index = () => {
               className="w-[12rem] h-[12rem] flex flex-col items-center justify-center transition-transform transform hover:scale-105 hover:shadow-lg cursor-pointer bg-white"
               onClick={() => navigate(item.path)}
             >
-              <Box className="text-5xl mb-2 hover:text-gray-700">{item.icon}</Box>
+              <Box className="text-5xl mb-2 hover:text-gray-700">
+                {item.icon}
+              </Box>
               <CardContent className="text-center">
                 <Typography
                   variant="h6"
